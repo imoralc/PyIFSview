@@ -14,7 +14,7 @@ It is a visualisation and analysis toolbox for data cubes. It is designed to wor
 ## MPDAF (Bacon et al. 2016)
 
 The MUSE Python Data Analysis Framework. It has been developed and used in the MUSE Consortium for several years, and is available freely for the community: https://mpdaf.readthedocs.io/en/latest/
-> **It is not interactive**
+**It is not interactive**
 
 ## MARVIN (Cherinka et al. 2019, https://www.sdss.org/dr15/manga/marvin/)
 
