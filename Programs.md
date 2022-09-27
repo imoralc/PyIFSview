@@ -35,9 +35,12 @@ It doesn't allow to visualize only the input data. **You have to run GIST** and 
 
 
 
-|          | QFitsView2 | PINGSOF |  CubeViz |  MPDAF | MARVIN  | Mapviewer |
-|----------|:----------:|--------:|----------|:------:|--------:|----------:|
-|   Simple       |  |  |   |   |   |  |
+|              | QFitsView2 | PINGSOF |  CubeViz |  MPDAF | MARVIN  | Mapviewer |
+|--------------|:----------:|--------:|----------|:------:|--------:|----------:|
+| Simple       |            |         |          |        |         |           |
+| Python       |            |         |          |        |         |           |
+| interactive  |            |         |          |        |         |           |
+| not specific |            |         |          |        |         |           |
 
 
 
