@@ -37,9 +37,9 @@ import sys
 
 # Angel update fuego color map
 import matplotlib.colors as colors
-fuego_color_map = colors.LinearSegmentedColormap.from_list("fuego", ((0.25, 0, 0),  (0.5,0,0),    (1, 0, 0), (1, 0.5, 0), (1, 0.75, 0), (1, 1, 0), (1, 1, 1)), N=256, gamma=1.0)
-fuego_color_map.set_bad('lightgray')
-plt.register_cmap(cmap=fuego_color_map)
+#fuego_color_map = colors.LinearSegmentedColormap.from_list("fuego", ((0.25, 0, 0),  (0.5,0,0),    (1, 0, 0), (1, 0.5, 0), (1, 0.75, 0), (1, 1, 0), (1, 1, 1)), N=256, gamma=1.0)
+#fuego_color_map.set_bad('lightgray')
+#plt.register_cmap(cmap=fuego_color_map)
 
 # Set global parameters
 
@@ -153,7 +153,8 @@ def input_slide(val):
     ptitle = np.str(np.round(wave[slide],2))+' $\AA$'    
     ax1.set_title(ptitle)
     #fig.canvas.draw_idle()   
-    if verbose: print("Update slide:  ",slide,"   at   ",ptitle)
+    if verbose: 
+        print("Update slide:  ",slide,"   at   ",ptitle)
     
 def planeup_event(event):
     global slide
@@ -342,36 +343,37 @@ if __name__ == "__main__":
     
     #cube_fits_file = '/DATA/KOALA/Python/PACE/385R/POX4_385R_20201029.fits' 
     #cube_fits_file = "/DATA/KOALA/Jamila/20180227/385R/He2_10Ar_385R_JAMILA.fits"
-    cube_fits_file = sys.argv[1]
+    #cube_fits_file = sys.argv[1]
+    cube_fits_file = 'NGC2253.V500.rscube.fits'
     
     
     # Read arguments, 
     # ANGEL: I know this is probably not the optimal way of doing it but it works...
     
-    argv = sys.argv[2:]
-    for value in argv:
-        if value[:6] == "l_min=":
-            l_min=np.float(value[6:])
-        elif value[:6] == "l_max=":
-            l_max=np.float(value[6:])
-        elif value[:6] == "slide=":
-            slide=np.int(value[6:])
-        elif value[:2] == "s=":
-            slide=np.int(value[2:])
-        elif value[:6] == "c_min=":
-            c_min=np.float(value[6:])
-        elif value[:6] == "c_max=":
-            c_max=np.float(value[6:])    
-        elif value[:6] == "f_min=":
-            f_min=np.float(value[6:])
-        elif value[:6] == "f_max=":
-            f_max=np.float(value[6:])  
-        elif value[:2] == "x=":
-            x0=np.int(value[2:])
-        elif value[:2] == "y=":
-            y0=np.int(value[2:])
-        elif value[:5] == "cmap=":
-            cmap0=value[5:]
+#    argv = sys.argv[2:]
+#    for value in argv:
+#        if value[:6] == "l_min=":
+#            l_min=np.float(value[6:])
+#        elif value[:6] == "l_max=":
+#            l_max=np.float(value[6:])
+#        elif value[:6] == "slide=":
+#            slide=np.int(value[6:])
+#        elif value[:2] == "s=":
+#            slide=np.int(value[2:])
+#        elif value[:6] == "c_min=":
+#            c_min=np.float(value[6:])
+#        elif value[:6] == "c_max=":
+#            c_max=np.float(value[6:])    
+#        elif value[:6] == "f_min=":
+#            f_min=np.float(value[6:])
+#        elif value[:6] == "f_max=":
+#            f_max=np.float(value[6:])  
+#        elif value[:2] == "x=":
+#            x0=np.int(value[2:])
+#        elif value[:2] == "y=":
+#            y0=np.int(value[2:])
+#        elif value[:5] == "cmap=":
+#            cmap0=value[5:]
     
 
 #   IF TRYING THIS EVERYTHING BREAKS...
@@ -412,7 +414,8 @@ if __name__ == "__main__":
     if verbose: print("Min value found in this cube:", minimo)
     if minimo < 0: 
         image_data= image_data + np.abs(minimo) +1E-20
-        if verbose: print("----> As this value is negative, adopting as min value ",np.nanmin(image_data))
+        if verbose: 
+            print("----> As this value is negative, adopting as min value ",np.nanmin(image_data))
     
     # Original:
     #wave = np.arange(crval3, crval3+cdelt3*naxis3, cdelt3) #wavelength
@@ -434,21 +437,29 @@ if __name__ == "__main__":
     
     #### initial values
     
-    if cmap0 == "" : cmap0 = 'jet'
-    elif cmap0 not in color_list : cmap0 = 'jet'
+    if cmap0 == "" : 
+        cmap0 = 'jet'
+    elif cmap0 not in color_list : 
+        cmap0 = 'jet'
     
-    if slide == 0: slide = int(naxis3/2) 
-    if c_min == -1: c_min = np.nanpercentile(image_data, 1)
-    if c_max ==0 : c_max = np.nanmax(image_data)
+    if slide == 0: 
+        slide = int(naxis3/2) 
+    if c_min == -1: 
+        c_min = np.nanpercentile(image_data, 1)
+    if c_max ==0 : 
+        c_max = np.nanmax(image_data)
     
     #### figure 1: MAP at slide with imshow
     
-    if x0 ==0 : x0 = int(naxis1/2)
-    if y0 ==0 : y0 = int(naxis2/2)
+    if x0 ==0 : 
+        x0 = int(naxis1/2)
+    if y0 ==0 : 
+        y0 = int(naxis2/2)
     
     ax1.set_title(str(np.round(wave[slide],2))+' $\AA$')
     
     norm=colors.LogNorm(vmin=c_min, vmax=c_max)
+    
     
     l = ax1.imshow(image_data[slide], origin='lower', cmap=cmap0, norm=norm)
     
@@ -478,14 +489,17 @@ if __name__ == "__main__":
     
     l3, = ax2.plot([wave[slide],wave[slide]],[-10,10]) # interactive vertical line
                       
-    if l_min == 0 :l_min = min(wave) 
-    if l_max == 0: l_max = max(wave)
+    if l_min == 0 :
+        l_min = min(wave) 
+    if l_max == 0: 
+        l_max = max(wave)
     
     ax2.set_xlim(l_min, l_max)
             
     w_low_index=np.abs(np.array(wave)-l_min).argmin()
     w_high_index=np.abs(np.array(wave)-l_max).argmin()
-    if f_max == 0:  f_max =np.nanmax(image_data[w_low_index:w_high_index,y0, x0])
+    if f_max == 0:  
+        f_max =np.nanmax(image_data[w_low_index:w_high_index,y0, x0])
     
     ax2.set_ylim(f_min,f_max)
     
@@ -549,7 +563,8 @@ if __name__ == "__main__":
     
     ##### defining interactive limits for flux in spectrum
     
-    if f_max == 0: f_max = np.nanmax(image_data)
+    if f_max == 0: 
+        f_max = np.nanmax(image_data)
     
     ax_fmin = plt.axes([0.65, 0.45, 0.19, 0.03])
     ax_fmax  = plt.axes([0.65, 0.5, 0.19, 0.03])
@@ -645,5 +660,5 @@ if __name__ == "__main__":
         
     button.on_clicked(reset)
     
-    plt.gcf().canvas.set_window_title('PyIFSview in file: '+cube_fits_file)
+    #plt.gcf().canvas.set_window_title('PyIFSview in file: '+cube_fits_file)
     plt.show()
