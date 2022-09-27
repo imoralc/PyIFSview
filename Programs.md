@@ -28,17 +28,19 @@ It doesn't allow to visualize only the input data. **You have to run GIST** and 
 
 # Advantage of our program:
 
-1. It is simple
-2. It is written in Python 
-3. It is interactive 
-4. It is not specific 
+1. It is simple or 
+2. It can visualize only the input data
+3. It is written in Python 
+4. It is interactive 
+5. It is not specific 
 
 
 
 |              | QFitsView2 |   PINGSOF  |   CubeViz  |    MPDAF   |   MARVIN   |  Mapviewer |
 |--------------|:----------:|-----------:|------------|:----------:|-----------:|-----------:|
 | Simple       |            |            |            |            |            |            |
-| Python       |            |            |     X      |            |            |     X      |
+| Input data   |     X      |     X      |     X      |      X     |     X      |            |
+| Python       |            |            |     X      |      X     |            |     X      |
 | interactive  |     X      |     X      |     X      |            |     X      |     X      |
 | not specific |     X      |     X      |            |            |            |     X      |
 
