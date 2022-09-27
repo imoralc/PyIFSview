@@ -28,7 +28,7 @@ It doesn't allow to visualize only the input data. **You have to run GIST** and 
 
 # Advantage of our program:
 
-1. It is simple or 
+1. It is simple  
 2. It can visualize only the input data
 3. It is written in Python 
 4. It is interactive 
