@@ -11,6 +11,8 @@ It is written in **IDL** requiring an expensive license
 It is a visualisation and analysis toolbox for data cubes. It is designed to work with data cubes from the NIRSpec and MIRI instruments on JWST: https://cubeviz.readthedocs.io/en/0.3.0/index.html#
 **If it can work with any IFU, it is a problem**
 
+From the CubeViz webpage: *Some of Jdaviz’s dependencies require non-Python packages to work (particularly the front-end stack that is part of the Jupyter ecosystem).*
+
 ## MPDAF (Bacon et al. 2016)
 
 The MUSE Python Data Analysis Framework. It has been developed and used in the MUSE Consortium for several years, and is available freely for the community: https://mpdaf.readthedocs.io/en/latest/
