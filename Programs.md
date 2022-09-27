@@ -35,7 +35,7 @@ It doesn't allow to visualize only the input data. **You have to run GIST** and 
 
 
 
-|              | QFitsView2 | PINGSOF |  CubeViz |  MPDAF | MARVIN  | Mapviewer |
+|              | QFitsView2 |   PINGSOF  |   CubeViz  |    MPDAF   |   MARVIN   |  Mapviewer |
 |--------------|:----------:|-----------:|------------|:----------:|-----------:|-----------:|
 | Simple       |            |            |            |            |            |            |
 | Python       |            |            |     X      |            |            |     X      |
