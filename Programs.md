@@ -71,7 +71,7 @@ It doesn't allow to visualize only the input data. **You have to run GIST** and 
 |--------------|:----------:|-----------:|------------|:----------:|-----------:|-----------:|
 | Simple       |            |            |            |            |            |            |
 | Input data   |     X      |     X      |     X      |      X     |     X      |            |
-| Python       |            |            |            |      X     |            |     X      |
+| Python       |            |            |     X      |      X     |            |     X      |
 | interactive  |     X      |     X      |     X      |            |     X      |     X      |
 | not specific |     X      |     X      |            |            |            |     X      |
 
