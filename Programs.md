@@ -40,6 +40,11 @@ The available formats are:
 |     tabular-fits | Yes |  Yes     |      Yes|
 |       wcs1d-fits | Yes |  Yes     |      Yes|
 
+| Syntax      | Description | Test Text     | Test Text     |
+| :---        |    :----:   |          ---: |          ---: |
+| Header      | Title       | Here's this   |               |
+|       wcs1d-fits | Yes |  Yes     |      Yes|
+
 From the CubeViz webpage: *Some of Jdaviz’s dependencies require non-Python packages to work (particularly the front-end stack that is part of the Jupyter ecosystem).*
 
 ### MPDAF (Bacon et al. 2016)
