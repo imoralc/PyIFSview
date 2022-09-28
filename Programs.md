@@ -12,6 +12,7 @@ It is a visualisation and analysis toolbox for data cubes. It is designed to wor
 **If it can work with any IFU, it is a problem** -> It can work with JWST and MaNGA
 
 The available formats are:
+
 |      Format      Read Write Auto-identify
 |-----------------:|----:|---------:|--------:|
 |      6dFGS-split | Yes |   No     |      Yes|
