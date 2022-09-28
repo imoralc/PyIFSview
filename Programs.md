@@ -9,7 +9,35 @@ It is written in **IDL** requiring an expensive license
 ### CubeViz (Ferguson 2019)
 
 It is a visualisation and analysis toolbox for data cubes. It is designed to work with data cubes from the NIRSpec and MIRI instruments on JWST: https://cubeviz.readthedocs.io/en/0.3.0/index.html#
-**If it can work with any IFU, it is a problem**
+**If it can work with any IFU, it is a problem** -> It can work with JWST and MaNGA
+
+The available formats are:
+      Format      Read Write Auto-identify
+----------------- ---- ----- -------------
+      6dFGS-split  Yes    No           Yes
+    6dFGS-tabular  Yes    No           Yes
+    APOGEE apStar  Yes    No           Yes
+   APOGEE apVisit  Yes    No           Yes
+APOGEE aspcapStar  Yes    No           Yes
+            ASCII  Yes    No           Yes
+             ECSV  Yes    No           Yes
+          HST/COS  Yes    No           Yes
+         HST/STIS  Yes    No           Yes
+             IPAC  Yes    No           Yes
+         JWST c1d  Yes    No           Yes
+         JWST s2d  Yes    No           Yes
+         JWST s3d  Yes    No           Yes
+         JWST x1d  Yes    No           Yes
+      MUSCLES SED  Yes    No           Yes
+       MaNGA cube  Yes    No           Yes
+        MaNGA rss  Yes    No           Yes
+     SDSS spPlate  Yes    No           Yes
+ SDSS-I/II spSpec  Yes    No           Yes
+ SDSS-III/IV spec  Yes    No           Yes
+ Subaru-pfsObject  Yes    No           Yes
+             iraf  Yes    No           Yes
+     tabular-fits  Yes   Yes           Yes
+       wcs1d-fits  Yes   Yes           Yes
 
 From the CubeViz webpage: *Some of Jdaviz’s dependencies require non-Python packages to work (particularly the front-end stack that is part of the Jupyter ecosystem).*
 
