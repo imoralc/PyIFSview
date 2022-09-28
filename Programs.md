@@ -40,34 +40,6 @@ The available formats are:
 |     tabular-fits | Yes |  Yes     |      Yes|
 |       wcs1d-fits | Yes |  Yes     |      Yes|
 
-| Syntax      | Description | Test Text     | Test Text     |
-| :---        |    :----:   |          ---: |          ---: |
-| Header      | Title       | Here's this   |               |
-|      6dFGS-split | Yes |   No     |      Yes|
-|    6dFGS-tabular | Yes |   No     |      Yes|
-|    APOGEE apStar | Yes |   No     |      Yes|
-|   APOGEE apVisit | Yes |   No     |      Yes|
-|APOGEE aspcapStar | Yes |   No     |      Yes|
-|            ASCII | Yes |   No     |      Yes|
-|             ECSV | Yes |   No     |      Yes|
-|          HST/COS | Yes |   No     |      Yes|
-|         HST/STIS | Yes |   No     |      Yes|
-|             IPAC | Yes |   No     |      Yes|
-|         JWST c1d | Yes |   No     |      Yes|
-|         JWST s2d | Yes |   No     |      Yes|
-|         JWST s3d | Yes |   No     |      Yes|
-|         JWST x1d | Yes |   No     |      Yes|
-|      MUSCLES SED | Yes |   No     |      Yes|
-|       MaNGA cube | Yes |   No     |      Yes|
-|        MaNGA rss | Yes |   No     |      Yes|
-|     SDSS spPlate | Yes |   No     |      Yes|
-| SDSS-I/II spSpec | Yes |   No     |      Yes|
-| SDSS-III/IV spec | Yes |   No     |      Yes|
-| Subaru-pfsObject | Yes |   No     |      Yes|
-|             iraf | Yes |   No     |      Yes|
-|     tabular-fits | Yes |  Yes     |      Yes|
-|       wcs1d-fits | Yes |  Yes     |      Yes|
-
 From the CubeViz webpage: *Some of Jdaviz’s dependencies require non-Python packages to work (particularly the front-end stack that is part of the Jupyter ecosystem).*
 
 ### MPDAF (Bacon et al. 2016)
