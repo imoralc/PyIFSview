@@ -6,6 +6,8 @@ The basic functionality of this interactive tool is to visualise IFU data (e.g. 
 
 Updated for KOALA by Angel López-Sánchez (AAO-MQ, Angel.Lopez-Sanchez@mq.edu.au)
 
+Uptaded for Ignacio del Moral-Castro, removing TextBox
+
 Examples:
 
     - From command line:
@@ -18,7 +20,8 @@ Examples:
 > os.system("python PyIFSview.py /DATA/KOALA/Jamila/20180227/385R/He2_10Ar_385R_JAMILA.fits  s=318 l_min=6500. x=43 y=35 l_max=6800.")
 
 '''
-version="Version 1.0 - 1 Aug 2021"
+#version="Version 1.0 - 1 Aug 2021"
+version="Version 2.0 - 29 Sep 2022"
 
 ########################################################################
 #     importing libraries                                              #
@@ -134,14 +137,18 @@ def scalefunc(label):
     l4, = ax1.plot(x0, y0, '+', color='black')
     cbar = fig.colorbar(l, orientation="vertical", pad=0.02, ax=ax1)
     cbar.set_label('Flux [ erg cm$^{-2}$ s$^{-1}$ A$^{-1}$]')
-    radio.set_active(color_list.index(cmap0))
+    #radio.set_active(color_list.index(cmap0))
     #plt.draw()
 
 ##### Functions for update value of the slide
 
 def update_slide(val):
-    slide = np.int(np.round(val))
-    text_box10.set_val(slide)       # Updating the text box will do the rest!!
+    global slide
+    slide = sslide.val
+    l.set_data(image_data[int(slide)])
+    l3.set_data([wave[int(slide)], wave[int(slide)]],[-10,10])
+    ax1.set_title(str(wave[int(slide)])+' $\AA$')
+    fig.canvas.draw_idle()
 
 def input_slide(val):
     global slide
@@ -161,16 +168,28 @@ def planeup_event(event):
     slide = slide+1
     if slide > naxis3:
         slide = naxis3
+    sslide.set_val(slide)
+    ptitle = np.str(np.round(wave[slide],2))+' $\AA$'  
+    l.set_data(image_data[slide])
+    l3.set_data([wave[slide], wave[slide]],[-10,10])
+    ptitle = np.str(np.round(wave[slide],2))+' $\AA$'    
+    ax1.set_title(ptitle)
         #print("CAN'T GO HIGHER!!")
-    text_box10.set_val(slide)       # Updating the the text box will do the rest!!
+    # text_box10.set_val(slide)       # Updating the the text box will do the rest!!
 
 def planedown_event(event):
     global slide
     slide = slide-1
     if slide < 1: 
         slide = 1
+    sslide.set_val(slide)
+    ptitle = np.str(np.round(wave[slide],2))+' $\AA$'  
+    l.set_data(image_data[slide])
+    l3.set_data([wave[slide], wave[slide]],[-10,10])
+    ptitle = np.str(np.round(wave[slide],2))+' $\AA$'    
+    ax1.set_title(ptitle)
         #print("CAN'T GO LOWER!!")
-    text_box10.set_val(slide)       # Updating the the text box will do the rest!!
+    # text_box10.set_val(slide)       # Updating the the text box will do the rest!!
 
 
 ##### Functions for setting the colour map and the colour range
@@ -179,20 +198,20 @@ def colorfunc(label):
     global cmap0,x0,y0
     cmap0=label
     l.set_cmap(cmap0)
-    #plt.draw()
+    plt.draw()
     
 def update_cmin(val, s=None):
     global c_min,c_max
     c_min = s_cmin.val
     l.set_clim([c_min, c_max])
-    text_box1.set_val("{:.3e}".format(c_min))
+    # text_box1.set_val("{:.3e}".format(c_min))
     #plt.draw()
 
 def update_cmax(val, s=None):
     global c_min,c_max
     c_max = s_cmax.val
     l.set_clim([c_min, c_max])
-    text_box2.set_val("{:.3e}".format(c_max))
+    # text_box2.set_val("{:.3e}".format(c_max))
     #plt.draw()
 
 ##### Functions for setting the wavelength range
@@ -201,14 +220,14 @@ def update_lmin(val, s=None):
     global l_min,l_max
     l_min = s_lmin.val
     ax2.set_xlim(l_min,l_max)
-    text_box4.set_val(np.round(l_min,2))
+    # text_box4.set_val(np.round(l_min,2))
     #plt.draw()
 
 def update_lmax(val, s=None):
     global l_min,l_max
     l_max = s_lmax.val
     ax2.set_xlim(l_min,l_max)
-    text_box3.set_val(np.round(l_max,2))
+    # text_box3.set_val(np.round(l_max,2))
     #plt.draw()
 
 ##### Functions for setting the flux range
@@ -217,14 +236,14 @@ def update_fmin(val, s=None):
     global f_min,f_max
     f_min = s_fmin.val
     ax2.set_ylim(f_min,f_max)
-    text_box5.set_val("{:5.2e}".format(f_min))
+    # text_box5.set_val("{:5.2e}".format(f_min))
     #plt.draw()
 
 def update_fmax(val, s=None):
     global f_min,f_max
     f_max = s_fmax.val
     ax2.set_ylim(f_min,f_max)
-    text_box6.set_val("{:5.2e}".format(f_max))
+    # text_box6.set_val("{:5.2e}".format(f_max))
     #plt.draw()
 
 ##### Functions for input boxes
@@ -283,9 +302,9 @@ def input_spaxel(x,y):
     w_high_index=np.abs(np.array(wave)-l_max).argmin()
     f_max = np.nanmax(image_data[w_low_index:w_high_index,y,x])
     ax2.set_ylim(f_min,f_max)
-    text_box6.set_val("{:5.2e}".format(f_max))   
-    text_box7.set_val(x)
-    text_box8.set_val(y)
+    # text_box6.set_val("{:5.2e}".format(f_max))   
+    # text_box7.set_val(x)
+    # text_box8.set_val(y)
     #plt.draw()
     #if verbose: print("Update to spaxel: ",x,y)
     
@@ -308,9 +327,12 @@ def onclick(event):
     # Check if the click was in ax1 and update spectrum
     if event.inaxes in [ax1]: 
         if int(event.xdata) < naxis1 and int(event.ydata) < naxis2:
-            indexx = int(np.round(event.xdata))
-            indexy = int(np.round(event.ydata))
+            indexx = int(event.xdata)
+            indexy = int(event.ydata)
             input_spaxel(indexx,indexy)
+            #l4.set_data(indexx, indexy)
+            #l2.set_data(wave[:], image_data[:, indexy,indexx])
+            plt.draw()
             #text_box7.set_val(indexx)
             #text_box8.set_val(indexy)
     # Check if the click was in ax2 and update slide (image)
@@ -319,6 +341,9 @@ def onclick(event):
         val=np.abs(np.array(wave)-event.xdata).argmin()
         slide = np.int(val)
         sslide.set_val(slide)
+
+                    
+        
 
 ##### Function for reset
 
@@ -418,10 +443,10 @@ if __name__ == "__main__":
             print("----> As this value is negative, adopting as min value ",np.nanmin(image_data))
     
     # Original:
-    #wave = np.arange(crval3, crval3+cdelt3*naxis3, cdelt3) #wavelength
+    wave = np.arange(crval3, crval3+cdelt3*naxis3, cdelt3) #wavelength
     # PyKOALA:
     #wave = np.arange(crval3-cdelt3*naxis3/2., crval3+cdelt3*naxis3/2., cdelt3) #wavelength
-    wave = np.arange(crval3-cdelt3*naxis3/2., crval3+cdelt3*(naxis3-1)/2. , cdelt3) #wavelength
+#    wave = np.arange(crval3-cdelt3*naxis3/2., crval3+cdelt3*(naxis3-1)/2. , cdelt3) #wavelength
       
     
     ########################################################################
@@ -465,6 +490,7 @@ if __name__ == "__main__":
     
     l5, = ax1.plot(x0, y0, '+', color='white', ms=10.5, mew=1.1)
     l4, = ax1.plot(x0, y0, '+', color='black')
+    
     
     ax1.set_xlim(0,naxis1)
     ax1.set_ylim(0,naxis2)
@@ -520,11 +546,12 @@ if __name__ == "__main__":
     axfreq.set_xticklabels(wave_values)
     
     sslide.on_changed(update_slide)
+    
       
-    pslide = " {}".format(slide)
-    axbox10 = plt.axes([0.925, 0.92, 0.03, 0.05])
-    text_box10 = TextBox(axbox10, '', initial=pslide)
-    text_box10.on_submit(input_slide)
+    # pslide = " {}".format(slide)
+    # axbox10 = plt.axes([0.925, 0.92, 0.03, 0.05])
+    # text_box10 = TextBox(axbox10, '', initial=pslide)
+    # text_box10.on_submit(input_slide)
     
     
     ##### Defining moving plane by plane 
@@ -602,46 +629,46 @@ if __name__ == "__main__":
     
     ########  Text boxes with values
         
-    pcmin = "{:.3e}".format(c_min)    
-    axbox1 = plt.axes([0.85, 0.1, 0.06, 0.03])
-    text_box1 = TextBox(axbox1, '', initial=pcmin)
-    text_box1.on_submit(input_cmin)
+    # pcmin = "{:.3e}".format(c_min)    
+    # axbox1 = plt.axes([0.85, 0.1, 0.06, 0.03])
+    # text_box1 = TextBox(axbox1, '', initial=pcmin)
+    # text_box1.on_submit(input_cmin)
         
-    pcmax = "{:.3e}".format(c_max)
-    axbox2 = plt.axes([0.85, 0.15, 0.06, 0.03])
-    text_box2 = TextBox(axbox2, '', initial=pcmax)
-    text_box2.on_submit(input_cmax)
+    # pcmax = "{:.3e}".format(c_max)
+    # axbox2 = plt.axes([0.85, 0.15, 0.06, 0.03])
+    # text_box2 = TextBox(axbox2, '', initial=pcmax)
+    # text_box2.on_submit(input_cmax)
      
-    plmin = "{:.2f}".format(l_min)
-    axbox4 = plt.axes([0.85, 0.55, 0.06, 0.03])
-    text_box4 = TextBox(axbox4, '', initial=plmin)
-    text_box4.on_submit(input_lmin)
+    # plmin = "{:.2f}".format(l_min)
+    # axbox4 = plt.axes([0.85, 0.55, 0.06, 0.03])
+    # text_box4 = TextBox(axbox4, '', initial=plmin)
+    # text_box4.on_submit(input_lmin)
      
-    plmax = "{:.2f}".format(l_max)
-    axbox3 = plt.axes([0.85, 0.6, 0.06, 0.03])
-    text_box3 = TextBox(axbox3, '', initial=plmax)
-    text_box3.on_submit(input_lmax)
+    # plmax = "{:.2f}".format(l_max)
+    # axbox3 = plt.axes([0.85, 0.6, 0.06, 0.03])
+    # text_box3 = TextBox(axbox3, '', initial=plmax)
+    # text_box3.on_submit(input_lmax)
         
-    pfmin = "{:.3e}".format(f_min)
-    axbox5 = plt.axes([0.85, 0.45, 0.06, 0.03])
-    text_box5 = TextBox(axbox5, '', initial=pfmin)
-    text_box5.on_submit(input_fmin)
+    # pfmin = "{:.3e}".format(f_min)
+    # axbox5 = plt.axes([0.85, 0.45, 0.06, 0.03])
+    # text_box5 = TextBox(axbox5, '', initial=pfmin)
+    # text_box5.on_submit(input_fmin)
     
-    pfmax = "{:.3e}".format(f_max)
-    axbox6 = plt.axes([0.85, 0.5, 0.06, 0.03])
-    text_box6 = TextBox(axbox6, '', initial=pfmax)
-    text_box6.on_submit(input_fmax)
+    # pfmax = "{:.3e}".format(f_max)
+    # axbox6 = plt.axes([0.85, 0.5, 0.06, 0.03])
+    # text_box6 = TextBox(axbox6, '', initial=pfmax)
+    # text_box6.on_submit(input_fmax)
     
     
-    px = "{:}".format(x0)
-    axbox7 = plt.axes([0.85, 0.4, 0.04, 0.03])
-    text_box7 = TextBox(axbox7, 'x =', initial=px)
-    text_box7.on_submit(input_x0)
+    # px = "{:}".format(x0)
+    # axbox7 = plt.axes([0.85, 0.4, 0.04, 0.03])
+    # text_box7 = TextBox(axbox7, 'x =', initial=px)
+    # text_box7.on_submit(input_x0)
     
-    py = "{:}".format(y0)
-    axbox8 = plt.axes([0.85, 0.36, 0.04, 0.03])
-    text_box8 = TextBox(axbox8, 'y =', initial=py)
-    text_box8.on_submit(input_y0)
+    # py = "{:}".format(y0)
+    # axbox8 = plt.axes([0.85, 0.36, 0.04, 0.03])
+    # text_box8 = TextBox(axbox8, 'y =', initial=py)
+    # text_box8.on_submit(input_y0)
     
     ##### choosing linear / log map
     
@@ -662,3 +689,4 @@ if __name__ == "__main__":
     
     #plt.gcf().canvas.set_window_title('PyIFSview in file: '+cube_fits_file)
     plt.show()
+    
