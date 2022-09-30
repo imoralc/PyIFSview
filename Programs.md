@@ -8,7 +8,7 @@ It is written in **IDL** requiring an expensive license
 
 ### CubeViz (Ferguson 2019)
 
-It is a visualisation and analysis toolbox for data cubes. It is designed to work with data cubes from the NIRSpec and MIRI instruments on JWST: https://cubeviz.readthedocs.io/en/0.3.0/index.html#
+It is a visualisation and analysis toolbox for data cubes. It is designed to work with data cubes from the NIRSpec and MIRI instruments on JWST: https://jdaviz.readthedocs.io/en/latest/cubeviz/index.html
 **If it can work with any IFU, it is a problem** -> It can work with JWST and MaNGA
 
 The available formats are:
