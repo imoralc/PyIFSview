@@ -1,8 +1,10 @@
 # PyIFSview
+
 Simple python tool developed to interactively visualize integral field spectroscopy (IFS) data,  such as CALIFA, MaNGA, SAMI or MUSE data.
 
 ## Installation:
-No installation is necessary. Only copy the files  and run it to visualize the desired datacube.
+
+We try to make the usage of PyIFSview as simple as possible, so no installation is necessary. Only copy the files  and run it to visualize the desired datacube.
 
 ## Software Requirements:
 
