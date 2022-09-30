@@ -12,4 +12,8 @@ Astropy: astronomy library
 
 ## Examples:
 
-![PyIFSview example video](Example_PyIFSview.mp4 "Example video using CALIFA data")
+![Example_PyIFSview](Example_PyIFSview.mp4)
+
+<video width="320" height="240" controls>
+  <source src="Example_PyIFSview.mp4" type="video/mp4">
+</video>
