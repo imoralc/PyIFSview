@@ -6,7 +6,10 @@ The basic functionality of this interactive tool is to visualise IFU data (e.g. 
 
 Updated for KOALA by Angel López-Sánchez (AAO-MQ, Angel.Lopez-Sanchez@mq.edu.au)
 
-Uptaded for Ignacio del Moral-Castro, removing TextBox
+Uptaded for Ignacio del Moral-Castro:
+    -) no textbox
+    -) no sys
+    -) values next to slides
 
 Examples:
 
@@ -21,7 +24,7 @@ Examples:
 
 '''
 #version="Version 1.0 - 1 Aug 2021"
-version="Version 2.0 - 29 Sep 2022"
+version="Version 1.1 - 29 Sep 2022"
 
 ########################################################################
 #     importing libraries                                              #
@@ -40,8 +43,8 @@ import sys
 
 # Angel update fuego color map
 import matplotlib.colors as colors
-#fuego_color_map = colors.LinearSegmentedColormap.from_list("fuego", ((0.25, 0, 0),  (0.5,0,0),    (1, 0, 0), (1, 0.5, 0), (1, 0.75, 0), (1, 1, 0), (1, 1, 1)), N=256, gamma=1.0)
-#fuego_color_map.set_bad('lightgray')
+fuego_color_map = colors.LinearSegmentedColormap.from_list("fuego", ((0.25, 0, 0),  (0.5,0,0),    (1, 0, 0), (1, 0.5, 0), (1, 0.75, 0), (1, 1, 0), (1, 1, 1)), N=256, gamma=1.0)
+fuego_color_map.set_bad('lightgray')
 #plt.register_cmap(cmap=fuego_color_map)
 
 # Set global parameters
@@ -133,11 +136,14 @@ def scalefunc(label):
     ax1.cla()
     cbar.remove()
     l = ax1.imshow(image_data[slide], origin='lower',cmap=cmap0, norm=norm)
+    ax1.set_xlabel('spaxel_x ')
+    ax1.set_ylabel('spaxel_y')
+    ax1.set_title(str(wave[int(slide)])+' $\AA$')
     l5, = ax1.plot(x0, y0, '+', color='white', ms=10.5, mew=1.1)
     l4, = ax1.plot(x0, y0, '+', color='black')
     cbar = fig.colorbar(l, orientation="vertical", pad=0.02, ax=ax1)
     cbar.set_label('Flux [ erg cm$^{-2}$ s$^{-1}$ A$^{-1}$]')
-    #radio.set_active(color_list.index(cmap0))
+    radio.set_active(color_list.index(cmap0))
     #plt.draw()
 
 ##### Functions for update value of the slide
@@ -369,7 +375,7 @@ if __name__ == "__main__":
     #cube_fits_file = '/DATA/KOALA/Python/PACE/385R/POX4_385R_20201029.fits' 
     #cube_fits_file = "/DATA/KOALA/Jamila/20180227/385R/He2_10Ar_385R_JAMILA.fits"
     #cube_fits_file = sys.argv[1]
-    cube_fits_file = 'NGC2253.V500.rscube.fits'
+    cube_fits_file = 'NGC2253.fits.gz'
     
     
     # Read arguments, 
@@ -496,8 +502,8 @@ if __name__ == "__main__":
     ax1.set_ylim(0,naxis2)
     ax1.axes.tick_params(axis='both',which='minor',direction='out',length=10)
     
-    ax1.set_xlabel('spaxel_x ')
-    ax1.set_ylabel('spaxel_y')
+    ax1.set_xlabel('spaxel_X')
+    ax1.set_ylabel('spaxel_Y')
     
     cbar = fig.colorbar(l, orientation="vertical", pad=0.02, ax=ax1)
     cbar.set_label('Flux [ erg cm$^{-2}$ s$^{-1}$ A$^{-1}$]')
@@ -580,10 +586,10 @@ if __name__ == "__main__":
     ax_lmin = plt.axes([0.65, 0.55, 0.19, 0.03])
     ax_lmax  = plt.axes([0.65, 0.6, 0.19, 0.03])
     
-    s_lmin = Slider(ax_lmin, 'l_min', np.min(wave), np.max(wave), valinit=l_min, valfmt='%7.2f')
-    s_lmin.valtext.set_visible(False)
-    s_lmax = Slider(ax_lmax, 'l_max', np.min(wave), np.max(wave), valinit=l_max, valfmt='%7.2f')
-    s_lmax.valtext.set_visible(False)
+    s_lmin = Slider(ax_lmin, '$\lambda_{min}$ ($\AA$)', np.min(wave), np.max(wave), valinit=l_min, valfmt='%7.2f')
+    #s_lmin.valtext.set_visible(False)
+    s_lmax = Slider(ax_lmax, '$\lambda_{max}$ ($\AA$)', np.min(wave), np.max(wave), valinit=l_max, valfmt='%7.2f')
+    #s_lmax.valtext.set_visible(False)
     
     s_lmin.on_changed(update_lmin)
     s_lmax.on_changed(update_lmax)
@@ -600,10 +606,10 @@ if __name__ == "__main__":
     f_min_real = np.nanmin([-np.nanmin(image_data),np.nanmin(image_data)])   #(np.abs(f_min) -f_max)/10. 
     f_max_real = np.nanmax(image_data)
         
-    s_fmin = Slider(ax_fmin, 'f_min', f_min_real, f_max_real, valinit=f_min, valfmt='%5.2E')
-    s_fmin.valtext.set_visible(False)
-    s_fmax = Slider(ax_fmax, 'f_max', f_min_real, f_max_real, valinit=f_max, valfmt='%5.2E')
-    s_fmax.valtext.set_visible(False)
+    s_fmin = Slider(ax_fmin, 'Flux$_{min}$', f_min_real, f_max_real, valinit=f_min, valfmt='%5.2E')
+    #s_fmin.valtext.set_visible(False)
+    s_fmax = Slider(ax_fmax, 'Flux$_{max}$', f_min_real, f_max_real, valinit=f_max, valfmt='%5.2E')
+    #s_fmax.valtext.set_visible(False)
     
     s_fmin.on_changed(update_fmin)
     s_fmax.on_changed(update_fmax)
@@ -618,10 +624,10 @@ if __name__ == "__main__":
     color_min =  np.nanpercentile(image_data, 1)    # These two must be the absolute min and max, otherwise this points couldn't be reached by slider!!!
     color_max =  np.nanmax(image_data)
     
-    s_cmin = Slider(ax_cmin, 'c_min', color_min, color_max, valinit=c_min, valfmt='%5.2E')
-    s_cmin.valtext.set_visible(False)
-    s_cmax = Slider(ax_cmax, 'c_max', color_min, color_max, valinit=c_max, valfmt='%5.2E')
-    s_cmax.valtext.set_visible(False)
+    s_cmin = Slider(ax_cmin, 'vmin', color_min, color_max, valinit=c_min, valfmt='%5.2E')
+    #s_cmin.valtext.set_visible(False)
+    s_cmax = Slider(ax_cmax, 'vmax', color_min, color_max, valinit=c_max, valfmt='%5.2E')
+    #s_cmax.valtext.set_visible(False)
     
     s_cmin.on_changed(update_cmin)
     s_cmax.on_changed(update_cmax)
@@ -689,4 +695,10 @@ if __name__ == "__main__":
     
     #plt.gcf().canvas.set_window_title('PyIFSview in file: '+cube_fits_file)
     plt.show()
+    
+
+
+
+
+
     

@@ -12,3 +12,4 @@ Astropy: astronomy library
 
 ## Examples:
 
+![PyIFSview example video](Example_PyIFSview.mp4 "Example video using CALIFA data")
