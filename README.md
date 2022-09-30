@@ -6,9 +6,9 @@ No installation is necessary. Only copy the files  and run it to visualize the d
 
 ## Software Requirements:
 
-- Numpy: Python library used for working with arrays
-- Matplotlib: Python 2D plotting library
-- Astropy: astronomy library
+- `Numpy`: Python library used for working with arrays
+- `Matplotlib`: Python 2D plotting library
+- `Astropy`: astronomy library
 
 ## Examples:
 
