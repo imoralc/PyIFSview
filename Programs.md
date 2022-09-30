@@ -69,7 +69,7 @@ It doesn't allow to visualize only the input data. **You have to run GIST** and 
 
 |              | QFitsView2 |   PINGSOF  |   CubeViz  |    MPDAF   |   MARVIN   |  Mapviewer |
 |--------------|:----------:|-----------:|------------|:----------:|-----------:|-----------:|
-| Simple       |            |            |            |            |            |            |
+| Simple       |     x      |            |            |            |            |            |
 | Input data   |     X      |     X      |     X      |      X     |     X      |            |
 | Python       |            |            |     X      |      X     |            |     X      |
 | interactive  |     X      |     X      |     X      |            |     X      |     X      |
