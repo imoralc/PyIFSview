@@ -45,15 +45,15 @@ plt.register_cmap(cmap=fuego_color_map)
 
 # Set global parameters
 
-global l,l3,ax1
-global cbar
-global norm
-global slide
-global c_max, c_min
-global l_max,l_min
-global f_min,f_max
-global x0,y0
-global verbose
+# global l,l3,ax1
+# global cbar
+# global norm
+# global slide
+# global c_max, c_min
+# global l_max,l_min
+# global f_min,f_max
+# global x0,y0
+# global verbose
 
 verbose= False
 slide = 0
