@@ -35,17 +35,13 @@ import matplotlib.pyplot as plt
 from matplotlib.widgets import Slider, Button, RadioButtons, TextBox
 from astropy.io import fits
 import matplotlib.gridspec as gridspec
-#from astropy.visualization import simple_norm
 import sys
-
-#import warnings
-#warnings.simplefilter('error', UserWarning)
 
 # Angel update fuego color map
 import matplotlib.colors as colors
 fuego_color_map = colors.LinearSegmentedColormap.from_list("fuego", ((0.25, 0, 0),  (0.5,0,0),    (1, 0, 0), (1, 0.5, 0), (1, 0.75, 0), (1, 1, 0), (1, 1, 1)), N=256, gamma=1.0)
 fuego_color_map.set_bad('lightgray')
-#plt.register_cmap(cmap=fuego_color_map)
+plt.register_cmap(cmap=fuego_color_map)
 
 # Set global parameters
 
@@ -84,44 +80,7 @@ color_list = ['jet', 'gist_gray','viridis', 'gnuplot', 'gnuplot2', 'cubehelix', 
 # -----------------------------------------------------------------------------
 # -----------------------------------------------------------------------------
 
-# class Sliderlog(Slider):
-
-#     """
-#     Logarithmic slider.
-
-#     Takes in every method and function of the matplotlib's slider.
-
-#     Set slider to *val* visually so the slider still is lineat but display 10**val next to the slider.
-
-#     Return 10**val to the update function (func)
-#     """
-
-#     def set_val(self, val):
-
-#         xy = self.poly.xy
-#         if self.orientation == 'vertical':
-#             xy[1] = 0, val
-#             xy[2] = 1, val
-#         else:
-#             xy[2] = val, 1
-#             xy[3] = val, 0
-#         self.poly.xy = xy
-#         self.valtext.set_text(self.valfmt % 10**val)   # Modified to display 10**val instead of val
-#         if self.drawon:
-#             self.ax.figure.canvas.draw_idle()
-#         self.val = val
-#         if not self.eventson:
-#             return
-#         for cid, func in self.observers.items():
-#                 func(10**val)
-                
-# -----------------------------------------------------------------------------
-# -----------------------------------------------------------------------------
-# -----------------------------------------------------------------------------
-# -----------------------------------------------------------------------------
-
 ##### Function for changing the colour scale linear/log/power
-
 
 def scalefunc(label):
     global l
@@ -135,7 +94,7 @@ def scalefunc(label):
         norm =colors.PowerNorm(2, vmin=c_min, vmax=c_max)       
     ax1.cla()
     cbar.remove()
-    l = ax1.imshow(image_data[slide], origin='lower',cmap=cmap0, norm=norm)
+    l = ax1.imshow(image_data[int(slide)], origin='lower',cmap=cmap0, norm=norm)
     ax1.set_xlabel('spaxel_x ')
     ax1.set_ylabel('spaxel_y')
     ax1.set_title(str(wave[int(slide)])+' $\AA$')
@@ -147,6 +106,14 @@ def scalefunc(label):
     #plt.draw()
 
 ##### Functions for update value of the slide
+
+"""" 
+These functions allow to modify and update the value of the slide plotting with imshow, using two options:
+
+-) cliking on the bar to select any value
+-) cliking on up and down bottoms to increase the smallest possible value 
+
+"""
 
 def update_slide(val):
     global slide
@@ -181,7 +148,6 @@ def planeup_event(event):
     ptitle = np.str(np.round(wave[slide],2))+' $\AA$'    
     ax1.set_title(ptitle)
         #print("CAN'T GO HIGHER!!")
-    # text_box10.set_val(slide)       # Updating the the text box will do the rest!!
 
 def planedown_event(event):
     global slide
@@ -195,10 +161,16 @@ def planedown_event(event):
     ptitle = np.str(np.round(wave[slide],2))+' $\AA$'    
     ax1.set_title(ptitle)
         #print("CAN'T GO LOWER!!")
-    # text_box10.set_val(slide)       # Updating the the text box will do the rest!!
 
 
 ##### Functions for setting the colour map and the colour range
+
+"""" 
+These functions allow to modify: 
+-) the colour map choosing among several options (more o different options can be add)
+-) the colour range choosing interactively the vmin and vmax values
+
+"""
 
 def colorfunc(label):
     global cmap0,x0,y0
@@ -210,30 +182,31 @@ def update_cmin(val, s=None):
     global c_min,c_max
     c_min = s_cmin.val
     l.set_clim([c_min, c_max])
-    # text_box1.set_val("{:.3e}".format(c_min))
     #plt.draw()
 
 def update_cmax(val, s=None):
     global c_min,c_max
     c_max = s_cmax.val
     l.set_clim([c_min, c_max])
-    # text_box2.set_val("{:.3e}".format(c_max))
     #plt.draw()
 
 ##### Functions for setting the wavelength range
+
+"""" 
+These functions allow to modify the wavelength range cliking on the bars to select any value
+
+"""
 
 def update_lmin(val, s=None):
     global l_min,l_max
     l_min = s_lmin.val
     ax2.set_xlim(l_min,l_max)
-    # text_box4.set_val(np.round(l_min,2))
     #plt.draw()
 
 def update_lmax(val, s=None):
     global l_min,l_max
     l_max = s_lmax.val
     ax2.set_xlim(l_min,l_max)
-    # text_box3.set_val(np.round(l_max,2))
     #plt.draw()
 
 ##### Functions for setting the flux range
@@ -242,60 +215,15 @@ def update_fmin(val, s=None):
     global f_min,f_max
     f_min = s_fmin.val
     ax2.set_ylim(f_min,f_max)
-    # text_box5.set_val("{:5.2e}".format(f_min))
     #plt.draw()
 
 def update_fmax(val, s=None):
     global f_min,f_max
     f_max = s_fmax.val
     ax2.set_ylim(f_min,f_max)
-    # text_box6.set_val("{:5.2e}".format(f_max))
     #plt.draw()
 
-##### Functions for input boxes
-
-def input_cmin(val):
-    global c_min
-    c_min = np.float(val)
-    #_cmax = _cmin *100.
-    l.set_clim([c_min, c_max])
-    #plt.draw()
-
-def input_cmax(val):
-    global c_max
-    c_max = np.float(val)
-    #_cmin = _cmax /100.
-    l.set_clim([c_min, c_max])
-    #plt.draw()    
-    
-def input_lmin(val):
-    global l_max,l_min
-    l_min = np.float(val)
-    s_lmin.set_val(l_min)
-    ax2.set_xlim(l_min,l_max)
-    #plt.draw()    
-
-def input_lmax(val):
-    global l_max,l_min
-    l_max = np.float(val)
-    s_lmax.set_val(l_max)
-    ax2.set_xlim(l_min,l_max)
-    #plt.draw()
-
-def input_fmin(val):
-    global f_max,f_min
-    f_min = np.float(val)
-    s_fmin.set_val(f_min)
-    ax2.set_ylim(f_min,f_max)
-    s_fmin.set_val(f_min)
-    #plt.draw()
-
-def input_fmax(val):
-    global f_max,f_min
-    f_max = np.float(val)
-    s_fmax.set_val(f_max)
-    ax2.set_ylim(f_min,f_max)
-    #plt.draw()
+##### Function for interactive changing spaxel cliking in image or changing slide clicking in spectrum
 
 def input_spaxel(x,y):
     global f_min, f_max
@@ -308,25 +236,9 @@ def input_spaxel(x,y):
     w_high_index=np.abs(np.array(wave)-l_max).argmin()
     f_max = np.nanmax(image_data[w_low_index:w_high_index,y,x])
     ax2.set_ylim(f_min,f_max)
-    # text_box6.set_val("{:5.2e}".format(f_max))   
-    # text_box7.set_val(x)
-    # text_box8.set_val(y)
     #plt.draw()
     #if verbose: print("Update to spaxel: ",x,y)
     
-def input_x0(val):
-    global y0,x0
-    x0=np.int(val)
-    input_spaxel(x0,y0)
-    #if verbose: print("input_x0: ",x0)
-def input_y0(val):
-    global x0,y0
-    y0=np.int(val)
-    input_spaxel(x0,y0)        
-    #if verbose: print("input_y0: ",y0)
-
-
-##### Function for interactive changing spaxel cliking in image or changing slide clicking in spectrum
 
 def onclick(event):
     global f_min,f_max,slide
@@ -339,8 +251,6 @@ def onclick(event):
             #l4.set_data(indexx, indexy)
             #l2.set_data(wave[:], image_data[:, indexy,indexx])
             plt.draw()
-            #text_box7.set_val(indexx)
-            #text_box8.set_val(indexy)
     # Check if the click was in ax2 and update slide (image)
     elif  event.inaxes in [ax2]:
         #print("\n\nClick event")
@@ -349,8 +259,6 @@ def onclick(event):
         sslide.set_val(slide)
 
                     
-        
-
 ##### Function for reset
 
 def reset(event):
@@ -512,7 +420,7 @@ if __name__ == "__main__":
     #### figure 2: spectrum
     
     ax2.set_title('spaxel'+' '+str(x0)+','+str(y0))
-    spectrum = image_data[:,y0, x0]   ############################## CAREFUL: KOALA data reads y0, x0 !!!!!!!!!!!!!!!!!!!!!!
+    spectrum = image_data[:,y0, x0]   ############################## CAREFUL: data reads y0, x0 !!!!!!!!!!!!!!!!!!!!!!
     l2, = ax2.plot(wave[:], spectrum, label='emision')
     ax2.set_xlabel('Wavelength [$\AA$]')
     ax2.minorticks_on()
@@ -552,14 +460,7 @@ if __name__ == "__main__":
     axfreq.set_xticklabels(wave_values)
     
     sslide.on_changed(update_slide)
-    
       
-    # pslide = " {}".format(slide)
-    # axbox10 = plt.axes([0.925, 0.92, 0.03, 0.05])
-    # text_box10 = TextBox(axbox10, '', initial=pslide)
-    # text_box10.on_submit(input_slide)
-    
-    
     ##### Defining moving plane by plane 
     
     planedown = plt.axes([0.108, 0.92, 0.017, 0.05])
@@ -575,8 +476,6 @@ if __name__ == "__main__":
     ##### defining interactive button for cmaps
     
     rax = plt.axes([0.65, 0.20, 0.15, 0.22])
-    
-    #radio = RadioButtons(rax, ('jet', 'gist_gray','viridis', 'gnuplot', 'gnuplot2', 'cubehelix', 'nipy_spectral', 'RdBu', 'fuego'), active=0)
     
     radio = RadioButtons(rax, (color_list), active=color_list.index(cmap0))
     radio.on_clicked(colorfunc)
@@ -632,51 +531,7 @@ if __name__ == "__main__":
     s_cmin.on_changed(update_cmin)
     s_cmax.on_changed(update_cmax)
     
-    
-    ########  Text boxes with values
-        
-    # pcmin = "{:.3e}".format(c_min)    
-    # axbox1 = plt.axes([0.85, 0.1, 0.06, 0.03])
-    # text_box1 = TextBox(axbox1, '', initial=pcmin)
-    # text_box1.on_submit(input_cmin)
-        
-    # pcmax = "{:.3e}".format(c_max)
-    # axbox2 = plt.axes([0.85, 0.15, 0.06, 0.03])
-    # text_box2 = TextBox(axbox2, '', initial=pcmax)
-    # text_box2.on_submit(input_cmax)
-     
-    # plmin = "{:.2f}".format(l_min)
-    # axbox4 = plt.axes([0.85, 0.55, 0.06, 0.03])
-    # text_box4 = TextBox(axbox4, '', initial=plmin)
-    # text_box4.on_submit(input_lmin)
-     
-    # plmax = "{:.2f}".format(l_max)
-    # axbox3 = plt.axes([0.85, 0.6, 0.06, 0.03])
-    # text_box3 = TextBox(axbox3, '', initial=plmax)
-    # text_box3.on_submit(input_lmax)
-        
-    # pfmin = "{:.3e}".format(f_min)
-    # axbox5 = plt.axes([0.85, 0.45, 0.06, 0.03])
-    # text_box5 = TextBox(axbox5, '', initial=pfmin)
-    # text_box5.on_submit(input_fmin)
-    
-    # pfmax = "{:.3e}".format(f_max)
-    # axbox6 = plt.axes([0.85, 0.5, 0.06, 0.03])
-    # text_box6 = TextBox(axbox6, '', initial=pfmax)
-    # text_box6.on_submit(input_fmax)
-    
-    
-    # px = "{:}".format(x0)
-    # axbox7 = plt.axes([0.85, 0.4, 0.04, 0.03])
-    # text_box7 = TextBox(axbox7, 'x =', initial=px)
-    # text_box7.on_submit(input_x0)
-    
-    # py = "{:}".format(y0)
-    # axbox8 = plt.axes([0.85, 0.36, 0.04, 0.03])
-    # text_box8 = TextBox(axbox8, 'y =', initial=py)
-    # text_box8.on_submit(input_y0)
-    
-    ##### choosing linear / log map
+    ##### choosing linear / log map / power
     
     scaleax = plt.axes([0.85, 0.25, 0.05, 0.1])
     scale = RadioButtons(scaleax, ('linear', 'log', 'power 2'), active=1)
