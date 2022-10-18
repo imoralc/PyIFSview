@@ -4,6 +4,7 @@ from matplotlib.widgets import Slider, Button, RadioButtons
 from astropy.io import fits
 import matplotlib.gridspec as gridspec
 
+
 # Angel update fuego color map
 import matplotlib.colors as colors
 fuego_color_map = colors.LinearSegmentedColormap.from_list("fuego", ((0.25, 0, 0),  (0.5,0,0),    (1, 0, 0), (1, 0.5, 0), (1, 0.75, 0), (1, 1, 0), (1, 1, 1)), N=256, gamma=1.0)
@@ -65,10 +66,6 @@ class test(object):
         else:
             self.y0 = 0.
 
-        
-
-
-
         self.cmap0 =""
         self.color_list = ['jet', 'gist_gray','viridis', 'gnuplot', 'gnuplot2', 'cubehelix', 'nipy_spectral', 'RdBu', 'fuego']
         
@@ -76,45 +73,48 @@ class test(object):
 
         ### Open cube
 
-        hdu_list = fits.open(cube_fits_file) 
+        self.hdu_list = fits.open(cube_fits_file) 
         
         try:
-            self.image_data = hdu_list[0].data
+            self.image_data = self.hdu_list[0].data
             self.image_data[self.image_data == 0] = np.nan # convert 0 to nan
-            self.naxis1 = hdu_list[0].header['NAXIS1']
-            self.naxis2 = hdu_list[0].header['NAXIS2']
-            self.naxis3 = hdu_list[0].header['NAXIS3']
-            self.crval3 = hdu_list[0].header['CRVAL3']
-            self.cdelt3 = hdu_list[0].header['CDELT3']
+            self.naxis1 = self.hdu_list[0].header['NAXIS1']
+            self.naxis2 = self.hdu_list[0].header['NAXIS2']
+            self.naxis3 = self.hdu_list[0].header['NAXIS3']
+            self.crval3 = self.hdu_list[0].header['CRVAL3']
+            try:
+                self.cdelt3 = self.hdu_list[0].header['CDELT3']
+            except:
+                self.cdelt3 = self.hdu_list[0].header['CD3_3'] 
 
             #self.image_error = hdu_list[1].data
 
             # Read the error spectra if available. Otherwise estimate the errors with the der_snr algorithm
-            if len(hdu_list) == 3:
-                self.image_error = hdu_list[1].data
-            elif len(hdu_list) == 2:
-                logging.info("No error extension found. Estimating the error spectra with the der_snr algorithm")
+            if len(self.hdu_list) > 2:
+                self.image_error = self.hdu_list[1].data
+            elif len(self.hdu_list) <= 2:
+                print("No error extension found. Estimating the error spectra with the der_snr algorithm")
                 self.image_error = np.zeros( self.image_data.shape )
                 for i in range( 0, self.image_data.shape[1] ):
-                    self.image_error[:,i] = der_snr.der_snr( self.image_data[:,i] )
-            
+                    self.image_error[:,i] = der_snr( self.image_data[:,i] )
+
         except:
-            self.image_data = hdu_list[1].data
+            self.image_data = self.hdu_list[1].data
             self.image_data[self.image_data == 0] = np.nan # convert 0 to nan
-            self.naxis1 = hdu_list[1].header['NAXIS1']
-            self.naxis2 = hdu_list[1].header['NAXIS2']
-            self.naxis3 = hdu_list[1].header['NAXIS3']
-            self.crval3 = hdu_list[1].header['CRVAL3']
-            self.cdelt3 = hdu_list[1].header['CD3_3'] 
+            self.naxis1 = self.hdu_list[1].header['NAXIS1']
+            self.naxis2 = self.hdu_list[1].header['NAXIS2']
+            self.naxis3 = self.hdu_list[1].header['NAXIS3']
+            self.crval3 = self.hdu_list[1].header['CRVAL3']
+            self.cdelt3 = self.hdu_list[1].header['CD3_3'] 
 
             # Read the error spectra if available. Otherwise estimate the errors with the der_snr algorithm
-            if len(hdu_list) == 3:
-                self.image_error  = hdu[2].data
-            elif len(hdu_list) == 2:
-                logging.info("No error extension found. Estimating the error spectra with the der_snr algorithm")
+            if len(self.hdu_list) > 2:
+                self.image_error  = self.hdu_list[2].data
+            elif len(self.hdu_list) <= 2:
+                print("No error extension found. Estimating the error spectra with the der_snr algorithm")
                 self.image_error = np.zeros( self.image_data.shape )
                 for i in range( 0, self.image_data.shape[1] ):
-                    self.image_error[:,i] = der_snr.der_snr( self.image_data[:,i] )
+                    self.image_error[:,i] = der_snr( self.image_data[:,i] )
 
 
 
@@ -515,5 +515,69 @@ class test(object):
 
     # -----------------------------------------------------------------------------
     # -----------------------------------------------------------------------------
+
+    # =====================================================================================
+
+def der_snr(flux):
+   
+# =====================================================================================
+   """
+   DESCRIPTION This function computes the signal to noise ratio DER_SNR following the
+               definition set forth by the Spectral Container Working Group of ST-ECF,
+	       MAST and CADC. 
+
+               signal = median(flux)      
+               noise  = 1.482602 / sqrt(6) median(abs(2 flux_i - flux_i-2 - flux_i+2))
+	       snr    = signal / noise
+               values with padded zeros are skipped
+
+   USAGE       snr = DER_SNR(flux)
+   PARAMETERS  none
+   INPUT       flux (the computation is unit independent)
+   OUTPUT      the estimated signal-to-noise ratio [dimensionless]
+   USES        numpy      
+   NOTES       The DER_SNR algorithm is an unbiased estimator describing the spectrum 
+	       as a whole as long as
+               * the noise is uncorrelated in wavelength bins spaced two pixels apart
+               * the noise is Normal distributed
+               * for large wavelength regions, the signal over the scale of 5 or
+	         more pixels can be approximated by a straight line
+ 
+               For most spectra, these conditions are met.
+
+   REFERENCES  * ST-ECF Newsletter, Issue #42:
+               www.spacetelescope.org/about/further_information/newsletters/html/newsletter_42.html
+               * Software:
+	       www.stecf.org/software/ASTROsoft/DER_SNR/
+   AUTHOR      Felix Stoehr, ST-ECF
+               24.05.2007, fst, initial import
+               01.01.2007, fst, added more help text
+               28.04.2010, fst, return value is a float now instead of a numpy.float64
+   EDITS       Minor edits by Adrian Bittner to fit the needs of the pipeline. 
+
+   """
+   from numpy import array, where, nanmedian, abs 
+
+   flux = array(flux)
+
+   # Values that are exactly zero (padded) are skipped
+   flux = array(flux[where(flux != 0.0)])
+   n    = len(flux)      
+
+   # For spectra shorter than this, no value can be returned
+   if (n>4):
+      signal = nanmedian(flux)
+
+      noise  = 0.6052697 * nanmedian(abs(2.0 * flux[2:n-2] - flux[0:n-4] - flux[4:n]))
+
+      return( noise )
+#      return float(signal / noise)  
+
+   else:
+
+      return(0.0)
+
+# end DER_SNR -------------------------------------------------------------------------
+
     # -----------------------------------------------------------------------------
     # -----------------------------------------------------------------------------
