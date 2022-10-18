@@ -15,61 +15,52 @@ class test(object):
     
     def __init__(self, cube_fits_file, slide=None, f_min =None, f_max =None, l_min =None, l_max =None, c_min =None, c_max =None, x0=None, y0=None):
 
-        self.verbose= False
+        ### Checking initial parameters
 
+        self.verbose= False
 
         if slide != None:
             self.slide = slide
         else:
             self.slide = 0
-        
 
         if c_min != None:
-        #self.f_min = 0.
             self.c_min = c_min
         else:
             self.c_min = -1.
 
         if c_max != None:
-        #self.f_max = 0.
             self.c_max = c_max
         else:
             self.c_max = 0.
 
         if f_min != None:
             self.f_min = f_min
-            print(f_min)
         else:
             self.f_min = 0.
 
         if f_max != None:
             self.f_max = f_max
-            print(f_max)
         else:
             self.f_max = 0.
-            print(self.f_max)
-
 
         if l_min != None:
-        #self.f_min = 0.
             self.l_min = l_min
         else:
             self.l_min = 0.
 
         if l_max != None:
-        #self.f_max = 0.
             self.l_max = l_max
         else:
             self.l_max = 0.
 
         if x0 != None:
-        #self.f_max = 0.
+
             self.x0 = x0
         else:
             self.x0 = 0.
 
         if y0 != None:
-        #self.f_max = 0.
             self.y0 = y0
         else:
             self.y0 = 0.
@@ -78,8 +69,9 @@ class test(object):
         self.cmap0 =""
         self.color_list = ['jet', 'gist_gray','viridis', 'gnuplot', 'gnuplot2', 'cubehelix', 'nipy_spectral', 'RdBu', 'fuego']
         
+        ###################### 
 
-        #cube_fits_file = 'NGC2253.fits.gz'
+        ### Open cube
 
         hdu_list = fits.open(cube_fits_file) 
         
@@ -122,8 +114,6 @@ class test(object):
         self.ax2 = self.fig.add_subplot(spec2[0, 0:3])     # Spectrum top row
         spec2.update(hspace=0.45)
 
-
-
         #### figure 2: spectrum
 
         if self.slide == 0: 
@@ -145,7 +135,6 @@ class test(object):
         if self.c_max ==0 : 
             self.c_max = np.nanmax(self.image_data) 
 
-
         if self.l_min == 0 :
             self.l_min = min(self.wave) 
         if self.l_max == 0: 
@@ -162,7 +151,6 @@ class test(object):
         self.l4, = self.ax1.plot(self.x0, self.y0, '+', color='black')
         
         ### define second plot with the spectrum
-
 
         self.ax2.set_title('spaxel'+' '+str(self.x0)+','+str(self.y0))
         spectrum = self.image_data[:,self.y0, self.x0]   ############################## CAREFUL: data reads y0, x0 !!!!!!!!!!!!!!!!!!!!!!
