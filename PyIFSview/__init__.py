@@ -13,7 +13,7 @@ plt.register_cmap(cmap=fuego_color_map)
 
 class test(object):
     
-    def __init__(self, cube_fits_file, slide=None, f_min =None, f_max =None, l_min =None, l_max =None, c_min =None, c_max =None, x0=None, y0=None):
+    def __init__(self, cube_fits_file, slide=None, f_min =None, f_max =None, l_min =None, l_max =None, c_min =None, c_max =None, x0=None, y0=None, snr_max=None, snr_min=None):
 
         ### Checking initial parameters
 
@@ -65,6 +65,9 @@ class test(object):
         else:
             self.y0 = 0.
 
+        
+
+
 
         self.cmap0 =""
         self.color_list = ['jet', 'gist_gray','viridis', 'gnuplot', 'gnuplot2', 'cubehelix', 'nipy_spectral', 'RdBu', 'fuego']
@@ -83,6 +86,17 @@ class test(object):
             self.naxis3 = hdu_list[0].header['NAXIS3']
             self.crval3 = hdu_list[0].header['CRVAL3']
             self.cdelt3 = hdu_list[0].header['CDELT3']
+
+            #self.image_error = hdu_list[1].data
+
+            # Read the error spectra if available. Otherwise estimate the errors with the der_snr algorithm
+            if len(hdu_list) == 3:
+                self.image_error = hdu_list[1].data
+            elif len(hdu_list) == 2:
+                logging.info("No error extension found. Estimating the error spectra with the der_snr algorithm")
+                self.image_error = np.zeros( self.image_data.shape )
+                for i in range( 0, self.image_data.shape[1] ):
+                    self.image_error[:,i] = der_snr.der_snr( self.image_data[:,i] )
             
         except:
             self.image_data = hdu_list[1].data
@@ -92,6 +106,16 @@ class test(object):
             self.naxis3 = hdu_list[1].header['NAXIS3']
             self.crval3 = hdu_list[1].header['CRVAL3']
             self.cdelt3 = hdu_list[1].header['CD3_3'] 
+
+            # Read the error spectra if available. Otherwise estimate the errors with the der_snr algorithm
+            if len(hdu_list) == 3:
+                self.image_error  = hdu[2].data
+            elif len(hdu_list) == 2:
+                logging.info("No error extension found. Estimating the error spectra with the der_snr algorithm")
+                self.image_error = np.zeros( self.image_data.shape )
+                for i in range( 0, self.image_data.shape[1] ):
+                    self.image_error[:,i] = der_snr.der_snr( self.image_data[:,i] )
+
 
 
         # Check we don't have negative values (for plotting log)
@@ -115,6 +139,16 @@ class test(object):
         spec2.update(hspace=0.45)
 
         #### figure 2: spectrum
+
+        if snr_min != None:
+            self.snr_min = snr_min
+        else:
+            self.snr_min = np.nanmin(self.wave)
+
+        if snr_max != None:
+            self.snr_max = snr_max
+        else:
+            self.snr_max = np.nanmax(self.wave)
 
         if self.slide == 0: 
             self.slide = int(self.naxis3/2) 
@@ -185,21 +219,23 @@ class test(object):
         self.radio = RadioButtons(rax, (color_list), active=color_list.index(self.cmap0))
         self.radio.on_clicked(self.colorfunc)
 
-        ######
-
-        self.sum_cube = np.sum(self.image_data, axis=0)
-
-        sscaleax = plt.axes([0.15, 0.25, 0.05, 0.1])
-        self.sscale = RadioButtons(sscaleax, ('slide', 'sum'), active=0)
-        self.sscale.on_clicked(self.scalefunc2)
-
-        ######
+        
 
         ##### choosing linear / log map / power
         
         scaleax = plt.axes([0.85, 0.25, 0.05, 0.1])
         self.scale = RadioButtons(scaleax, ('linear', 'log', 'power 2'), active=1)
         self.scale.on_clicked(self.scalefunc)
+
+        ######
+
+        self.sum_cube = np.sum(self.image_data, axis=0)
+
+        sscaleax = plt.axes([0.15, 0.25, 0.05, 0.1])
+        self.sscale = RadioButtons(sscaleax, ('slide', 'sum', 'snr'), active=0)
+        self.sscale.on_clicked(self.scalefunc2)
+
+        ######
 
 
         ##### defining interactive limits for cmaps
@@ -368,14 +404,30 @@ class test(object):
         self.ax1.cla()
         self.cbar.remove()
         if label =="slide":
-            self.l = self.ax1.imshow(self.image_data[int(self.slide)], origin='lower',cmap=self.cmap0)
+            self.l = self.ax1.imshow(self.image_data[int(self.slide)], origin='lower',cmap=self.cmap0, norm=self.norm)
         elif label =="sum":
             self.sum_cube = np.nansum(self.image_data, axis=0)
+            self.sum_cube[self.sum_cube == 0] = np.nan
             self.c_max = np.nanmax(np.nansum(self.image_data, axis=0))
-            self.c_min = np.nanmin(np.nansum(self.image_data, axis=0)) + 1000
-            self.c_min = np.nanpercentile(self.sum_cube, 22)
+            #self.c_min = np.nanmin(np.nansum(self.image_data, axis=0))
+            self.c_min = np.nanpercentile(self.sum_cube, 20)
             print(self.c_max, self.c_min)
-            self.l = self.ax1.imshow(self.sum_cube, vmin=self.c_min ,origin='lower',cmap=self.cmap0)
+            self.l = self.ax1.imshow(self.sum_cube, vmin=self.c_min, vmax= self.c_max, origin='lower',cmap=self.cmap0)
+        elif label =="snr":
+            self.idx_snr = np.where(np.logical_and( self.wave >= self.snr_min, self.wave <= self.snr_max ) )[0]
+            print(self.idx_snr)
+            self.idx_snr = np.nan_to_num(self.idx_snr)
+            self.signal = np.nanmedian(self.image_data[self.idx_snr,:],axis=0)
+            self.noise  = np.abs(np.nanmedian(np.sqrt(self.image_error[self.idx_snr,:]),axis=0))
+            self.snr    = self.signal / self.noise
+            print(np.nanmax(self.snr), np.nanmin(self.snr))
+            self.c_max = np.nanmax(self.snr)
+            #self.c_min = np.nanmin(np.nansum(self.image_data, axis=0))
+            self.c_min = np.nanpercentile(self.snr, 10)
+            self.l = self.ax1.imshow(self.snr, origin='lower', vmin=self.c_min, vmax= self.c_max, cmap=self.cmap0)
+
+
+
         self.ax1.set_xlabel('spaxel_x ')
         self.ax1.set_ylabel('spaxel_y')
         self.ax1.set_title(str(self.wave[int(self.slide)])+' $\AA$')
