@@ -185,6 +185,15 @@ class test(object):
         self.radio = RadioButtons(rax, (color_list), active=color_list.index(self.cmap0))
         self.radio.on_clicked(self.colorfunc)
 
+        ######
+
+        self.sum_cube = np.sum(self.image_data, axis=0)
+
+        sscaleax = plt.axes([0.15, 0.25, 0.05, 0.1])
+        self.sscale = RadioButtons(sscaleax, ('slide', 'sum'), active=0)
+        self.sscale.on_clicked(self.scalefunc2)
+
+        ######
 
         ##### choosing linear / log map / power
         
@@ -349,6 +358,36 @@ class test(object):
         #radio.set_active(self.color_list.index(self.cmap0))
         #plt.draw()
         self.fig.canvas.draw_idle()
+
+
+    ####
+
+    ##### Functions for setting the colour scale
+
+    def scalefunc2(self, label):
+        self.ax1.cla()
+        self.cbar.remove()
+        if label =="slide":
+            self.l = self.ax1.imshow(self.image_data[int(self.slide)], origin='lower',cmap=self.cmap0)
+        elif label =="sum":
+            self.sum_cube = np.nansum(self.image_data, axis=0)
+            self.c_max = np.nanmax(np.nansum(self.image_data, axis=0))
+            self.c_min = np.nanmin(np.nansum(self.image_data, axis=0)) + 1000
+            self.c_min = np.nanpercentile(self.sum_cube, 22)
+            print(self.c_max, self.c_min)
+            self.l = self.ax1.imshow(self.sum_cube, vmin=self.c_min ,origin='lower',cmap=self.cmap0)
+        self.ax1.set_xlabel('spaxel_x ')
+        self.ax1.set_ylabel('spaxel_y')
+        self.ax1.set_title(str(self.wave[int(self.slide)])+' $\AA$')
+        #l5, = ax1.plot(x0, y0, '+', color='white', ms=10.5, mew=1.1)
+        self.l4 = self.ax1.plot(self.x0, self.y0, '+', color='black')
+        self.cbar = self.fig.colorbar(self.l, orientation="vertical", pad=0.02, ax=self.ax1)
+        self.cbar.set_label('Flux [ erg cm$^{-2}$ s$^{-1}$ A$^{-1}$]')
+        #radio.set_active(self.color_list.index(self.cmap0))
+        #plt.draw()
+        self.fig.canvas.draw_idle()
+
+    ####
         
     ##### Function for interactive changing spaxel cliking in image or changing slide clicking in spectrum
 
