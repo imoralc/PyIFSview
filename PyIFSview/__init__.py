@@ -1,6 +1,6 @@
 import numpy as np
 import matplotlib.pyplot as plt
-from matplotlib.widgets import Slider, Button, RadioButtons
+from matplotlib.widgets import Slider, Button, RadioButtons, TextBox
 from astropy.io import fits
 import matplotlib.gridspec as gridspec
 
@@ -14,7 +14,7 @@ plt.register_cmap(cmap=fuego_color_map)
 
 class test(object):
     
-    def __init__(self, cube_fits_file, slide=None, f_min =None, f_max =None, l_min =None, l_max =None, c_min =None, c_max =None, x0=None, y0=None, snr_max=None, snr_min=None):
+    def __init__(self, cube_fits_file, origin_cube=None, slide=None, f_min =None, f_max =None, l_min =None, l_max =None, c_min =None, c_max =None, x0=None, y0=None, snr_max=None, snr_min=None):
 
         ### Checking initial parameters
 
@@ -73,48 +73,66 @@ class test(object):
 
         ### Open cube
 
-        self.hdu_list = fits.open(cube_fits_file) 
-        
-        try:
-            self.image_data = self.hdu_list[0].data
-            self.image_data[self.image_data == 0] = np.nan # convert 0 to nan
-            self.naxis1 = self.hdu_list[0].header['NAXIS1']
-            self.naxis2 = self.hdu_list[0].header['NAXIS2']
-            self.naxis3 = self.hdu_list[0].header['NAXIS3']
-            self.crval3 = self.hdu_list[0].header['CRVAL3']
+        if origin_cube == 'CALIFA':
+            self.open_CALIFA(cube_fits_file)
+        elif origin_cube == 'MUSE':
+            self.open_MUSE(cube_fits_file)
+        elif origin_cube == 'MANGA':
+            self.open_MANGA(cube_fits_file)
+        elif origin_cube == 'SAMI':
+            self.open_SAMI(cube_fits_file)
+        elif origin_cube == 'CAVITY':
+            self.open_CAVITY(cube_fits_file)
+        else:
+            self.hdu_list = fits.open(cube_fits_file) 
+            
             try:
-                self.cdelt3 = self.hdu_list[0].header['CDELT3']
+                self.image_data = self.hdu_list[0].data
+                self.image_data[self.image_data == 0] = np.nan # convert 0 to nan
+                self.naxis1 = self.hdu_list[0].header['NAXIS1']
+                self.naxis2 = self.hdu_list[0].header['NAXIS2']
+                self.naxis3 = self.hdu_list[0].header['NAXIS3']
+                self.crval3 = self.hdu_list[0].header['CRVAL3']
+                try:
+                    self.cdelt3 = self.hdu_list[0].header['CDELT3']
+                except:
+                    self.cdelt3 = self.hdu_list[0].header['CD3_3'] 
+
+                # Original:
+                self.wave = np.arange(self.crval3, self.crval3+self.cdelt3*self.naxis3, self.cdelt3) #wavelength
+
+                #self.image_error = hdu_list[1].data
+
+                # Read the error spectra if available. Otherwise estimate the errors with the der_snr algorithm
+                if len(self.hdu_list) > 2:
+                    self.image_error = self.hdu_list[1].data
+                elif len(self.hdu_list) <= 2:
+                    print("No error extension found. Estimating the error spectra with the der_snr algorithm")
+                    self.image_error = np.zeros( self.image_data.shape )
+                    for i in range( 0, self.image_data.shape[1] ):
+                        self.image_error[:,i] = der_snr( self.image_data[:,i] )
+
             except:
-                self.cdelt3 = self.hdu_list[0].header['CD3_3'] 
+                self.image_data = self.hdu_list[1].data
+                self.image_data[self.image_data == 0] = np.nan # convert 0 to nan
+                self.naxis1 = self.hdu_list[1].header['NAXIS1']
+                self.naxis2 = self.hdu_list[1].header['NAXIS2']
+                self.naxis3 = self.hdu_list[1].header['NAXIS3']
+                self.crval3 = self.hdu_list[1].header['CRVAL3']
+                self.cdelt3 = self.hdu_list[1].header['CD3_3'] 
 
-            #self.image_error = hdu_list[1].data
+                # Original:
+                self.wave = np.arange(self.crval3, self.crval3+self.cdelt3*self.naxis3, self.cdelt3) #wavelength
 
-            # Read the error spectra if available. Otherwise estimate the errors with the der_snr algorithm
-            if len(self.hdu_list) > 2:
-                self.image_error = self.hdu_list[1].data
-            elif len(self.hdu_list) <= 2:
-                print("No error extension found. Estimating the error spectra with the der_snr algorithm")
-                self.image_error = np.zeros( self.image_data.shape )
-                for i in range( 0, self.image_data.shape[1] ):
-                    self.image_error[:,i] = der_snr( self.image_data[:,i] )
 
-        except:
-            self.image_data = self.hdu_list[1].data
-            self.image_data[self.image_data == 0] = np.nan # convert 0 to nan
-            self.naxis1 = self.hdu_list[1].header['NAXIS1']
-            self.naxis2 = self.hdu_list[1].header['NAXIS2']
-            self.naxis3 = self.hdu_list[1].header['NAXIS3']
-            self.crval3 = self.hdu_list[1].header['CRVAL3']
-            self.cdelt3 = self.hdu_list[1].header['CD3_3'] 
-
-            # Read the error spectra if available. Otherwise estimate the errors with the der_snr algorithm
-            if len(self.hdu_list) > 2:
-                self.image_error  = self.hdu_list[2].data
-            elif len(self.hdu_list) <= 2:
-                print("No error extension found. Estimating the error spectra with the der_snr algorithm")
-                self.image_error = np.zeros( self.image_data.shape )
-                for i in range( 0, self.image_data.shape[1] ):
-                    self.image_error[:,i] = der_snr( self.image_data[:,i] )
+                # Read the error spectra if available. Otherwise estimate the errors with the der_snr algorithm
+                if len(self.hdu_list) > 2:
+                    self.image_error  = self.hdu_list[2].data
+                elif len(self.hdu_list) <= 2:
+                    print("No error extension found. Estimating the error spectra with the der_snr algorithm")
+                    self.image_error = np.zeros( self.image_data.shape )
+                    for i in range( 0, self.image_data.shape[1] ):
+                        self.image_error[:,i] = der_snr( self.image_data[:,i] )
 
 
 
@@ -126,8 +144,7 @@ class test(object):
             if self.verbose: 
                 print("----> As this value is negative, adopting as min value ",np.nanmin(self.image_data))
         
-        # Original:
-        self.wave = np.arange(self.crval3, self.crval3+self.cdelt3*self.naxis3, self.cdelt3) #wavelength
+        
 
 
         #self.fig, ax = plt.subplots()
@@ -233,7 +250,7 @@ class test(object):
 
         sscaleax = plt.axes([0.15, 0.25, 0.05, 0.1])
         self.sscale = RadioButtons(sscaleax, ('slide', 'sum', 'snr'), active=0)
-        self.sscale.on_clicked(self.scalefunc2)
+        self.sscale.on_clicked(self.select_map)
 
         ######
 
@@ -249,12 +266,25 @@ class test(object):
         self.color_max =  np.nanmax(self.image_data)
         
         self.s_cmin = Slider(ax_cmin, 'vmin', self.color_min, self.color_max, valinit=self.c_min, valfmt='%5.2E')
-        #s_cmin.valtext.set_visible(False)
+        self.s_cmin.valtext.set_visible(False)
         self.s_cmax = Slider(ax_cmax, 'vmax', self.color_min, self.color_max, valinit=self.c_max, valfmt='%5.2E')
-        #s_cmax.valtext.set_visible(False)
+        self.s_cmax.valtext.set_visible(False)
         
         self.s_cmin.on_changed(self.update_cmin)
         self.s_cmax.on_changed(self.update_cmax)
+
+        ########  Text boxes with values
+        
+        self.pcmin = "{:.3e}".format(self.c_min)    
+        axbox1 = plt.axes([0.85, 0.1, 0.06, 0.03])
+        self.text_box1 = TextBox(axbox1, '', initial=self.pcmin)
+        self.text_box1.on_submit(self.input_cmin)
+
+        self.pcmax = "{:.3e}".format(self.c_max)    
+        axbox2 = plt.axes([0.85, 0.15, 0.06, 0.03])
+        self.text_box2 = TextBox(axbox2, '', initial=self.pcmax)
+        self.text_box2.on_submit(self.input_cmax)
+
 
          ##### defining interactive limits for flux in spectrum
     
@@ -347,6 +377,22 @@ class test(object):
         self.fig.canvas.draw_idle()
             #print("CAN'T GO LOWER!!")
 
+
+
+    ##### Functions for input boxes
+
+    def input_cmin(self, val):
+        self.c_min = np.float(val)
+        #_cmax = _cmin *100.
+        self.l.set_clim([self.c_min, self.c_max])
+        #plt.draw()
+
+    def input_cmax(self, val):
+        self.c_max = np.float(val)
+        #_cmax = _cmin *100.
+        self.l.set_clim([self.c_min, self.c_max])
+        #plt.draw()
+
     ##### Functions for setting the colour map and the colour range
 
     """" 
@@ -364,12 +410,15 @@ class test(object):
 
     def update_cmin(self, val, s=None):
         #f_min = s_fmin.val
+        #c_cmin = self.s_cmin.val
         self.l.set_clim(self.s_cmin.val, self.s_cmax.val)
-        #plt.draw()
+        self.text_box1.set_val("{:.3e}".format(self.s_cmin.val))
+        plt.draw()
 
     def update_cmax(self, val, s=None):
         #f_max = s_fmax.val
         self.l.set_clim(self.s_cmin.val, self.s_cmax.val)
+        self.text_box2.set_val("{:.3e}".format(self.s_cmax.val))
         #plt.draw()
 
     ##### Functions for setting the colour scale
@@ -400,7 +449,7 @@ class test(object):
 
     ##### Functions for setting the colour scale
 
-    def scalefunc2(self, label):
+    def select_map(self, label):
         self.ax1.cla()
         self.cbar.remove()
         if label =="slide":
@@ -410,20 +459,20 @@ class test(object):
             self.sum_cube[self.sum_cube == 0] = np.nan
             self.c_max = np.nanmax(np.nansum(self.image_data, axis=0))
             #self.c_min = np.nanmin(np.nansum(self.image_data, axis=0))
-            self.c_min = np.nanpercentile(self.sum_cube, 20)
+            self.c_min = np.nanpercentile(self.sum_cube, 50)
             print(self.c_max, self.c_min)
             self.l = self.ax1.imshow(self.sum_cube, vmin=self.c_min, vmax= self.c_max, origin='lower',cmap=self.cmap0)
         elif label =="snr":
             self.idx_snr = np.where(np.logical_and( self.wave >= self.snr_min, self.wave <= self.snr_max ) )[0]
-            print(self.idx_snr)
-            self.idx_snr = np.nan_to_num(self.idx_snr)
+            #print(self.idx_snr)
+            #self.idx_snr = np.nan_to_num(self.idx_snr)
             self.signal = np.nanmedian(self.image_data[self.idx_snr,:],axis=0)
             self.noise  = np.abs(np.nanmedian(np.sqrt(self.image_error[self.idx_snr,:]),axis=0))
             self.snr    = self.signal / self.noise
             print(np.nanmax(self.snr), np.nanmin(self.snr))
             self.c_max = np.nanmax(self.snr)
             #self.c_min = np.nanmin(np.nansum(self.image_data, axis=0))
-            self.c_min = np.nanpercentile(self.snr, 10)
+            self.c_min = np.nanpercentile(self.snr, 50)
             self.l = self.ax1.imshow(self.snr, origin='lower', vmin=self.c_min, vmax= self.c_max, cmap=self.cmap0)
 
 
@@ -516,6 +565,140 @@ class test(object):
     # -----------------------------------------------------------------------------
     # -----------------------------------------------------------------------------
 
+    ##### Functions for opening specific datacubes
+
+    """" 
+    These functions allow to open specific datacubes for different large surveys 
+
+    """
+
+    def open_CALIFA(self, cube_fits_file):
+
+        self.hdu_list = fits.open(cube_fits_file) 
+
+        self.image_data = self.hdu_list[0].data
+        self.image_data[self.image_data == 0] = np.nan # convert 0 to nan
+        self.naxis1 = self.hdu_list[0].header['NAXIS1']
+        self.naxis2 = self.hdu_list[0].header['NAXIS2']
+        self.naxis3 = self.hdu_list[0].header['NAXIS3']
+        self.crval3 = self.hdu_list[0].header['CRVAL3']
+        self.cdelt3 = self.hdu_list[0].header['CDELT3']
+
+        # Original:
+        self.wave = np.arange(self.crval3, self.crval3+self.cdelt3*self.naxis3, self.cdelt3) #wavelength
+
+        # Read the error spectra if available. Otherwise estimate the errors with the der_snr algorithm
+        if len(self.hdu_list) > 2:
+            self.image_error  = self.hdu_list[1].data
+        elif len(self.hdu_list) <= 2:
+            print("No error extension found. Estimating the error spectra with the der_snr algorithm")
+            self.image_error = np.zeros( self.image_data.shape )
+            for i in range( 0, self.image_data.shape[0] ):
+                self.image_error[:,i] = der_snr( self.image_data[:,i] )
+
+    def open_MUSE(self, cube_fits_file):
+
+        self.hdu_list = fits.open(cube_fits_file) 
+
+        self.image_data = self.hdu_list[1].data
+        self.image_data[self.image_data == 1] = np.nan # convert 0 to nan
+        self.naxis1 = self.hdu_list[1].header['NAXIS1']
+        self.naxis2 = self.hdu_list[1].header['NAXIS2']
+        self.naxis3 = self.hdu_list[1].header['NAXIS3']
+        self.crval3 = self.hdu_list[1].header['CRVAL3']
+        self.cdelt3 = self.hdu_list[1].header['CD3_3']
+
+        # Read the error spectra if available. Otherwise estimate the errors with the der_snr algorithm
+        if len(self.hdu_list) > 3:
+            self.image_error  = self.hdu_list[2].data
+        elif len(self.hdu_list) <= 3:
+            print("No error extension found. Estimating the error spectra with the der_snr algorithm")
+            self.image_error = np.zeros( self.image_data.shape )
+            for i in range( 0, self.image_data.shape[1] ):
+                self.image_error[:,i] = der_snr( self.image_data[:,i] )
+
+        # Original:
+        self.wave = np.arange(self.crval3, self.crval3+self.cdelt3*self.naxis3, self.cdelt3) #wavelength
+
+    def open_MANGA(self, cube_fits_file):
+
+        self.hdu_list = fits.open(cube_fits_file) 
+
+        self.image_data = self.hdu_list['FLUX'].data
+        self.image_data[self.image_data == 1] = np.nan # convert 0 to nan
+        self.naxis1 = self.hdu_list[1].header['NAXIS1']
+        self.naxis2 = self.hdu_list[1].header['NAXIS2']
+        self.naxis3 = self.hdu_list[1].header['NAXIS3']
+        self.crval3 = self.hdu_list[1].header['CRVAL3']
+        self.cdelt3 = self.hdu_list[1].header['CD3_3']
+
+        # Original:
+        self.wave = self.hdu_list['WAVE'].data   #reading in wavelength
+
+    def open_SAMI(self, cube_fits_file):
+
+        self.hdu_list = fits.open(cube_fits_file) 
+
+        self.image_data = self.hdu_list[0].data
+        self.image_data[self.image_data == 1] = np.nan # convert 0 to nan
+        self.naxis1 = self.hdu_list[0].header['NAXIS1']
+        self.naxis2 = self.hdu_list[0].header['NAXIS2']
+        self.naxis3 = self.hdu_list[0].header['NAXIS3']
+        self.crval3 = self.hdu_list[0].header['CRVAL3']
+        self.cdelt3 = self.hdu_list[0].header['CDELT3']
+
+        # Read the error spectra if available. Otherwise estimate the errors with the der_snr algorithm
+        if len(self.hdu_list) > 2:
+            self.image_error  = self.hdu_list[1].data
+        elif len(self.hdu_list) <= 2:
+            print("No error extension found. Estimating the error spectra with the der_snr algorithm")
+            self.image_error = np.zeros( self.image_data.shape )
+            for i in range( 0, self.image_data.shape[0] ):
+                self.image_error[:,i] = der_snr( self.image_data[:,i] )
+
+        # Original:
+        self.wave = np.arange(self.crval3, self.crval3+self.cdelt3*self.naxis3, self.cdelt3) #wavelength
+
+    def open_CAVITY(self, cube_fits_file):
+
+        self.hdu_list = fits.open(cube_fits_file) 
+
+        self.image_data = self.hdu_list[0].data
+        self.image_data[self.image_data == 1] = np.nan # convert 0 to nan
+        self.naxis1 = self.hdu_list[0].header['NAXIS1']
+        self.naxis2 = self.hdu_list[0].header['NAXIS2']
+        self.naxis3 = self.hdu_list[0].header['NAXIS3']
+        self.crval3 = self.hdu_list[0].header['CRVAL3']
+        self.cdelt3 = self.hdu_list[0].header['CD3_3']
+        
+        # Read the error spectra if available. Otherwise estimate the errors with the der_snr algorithm
+        if len(self.hdu_list) > 2:
+            self.image_error  = self.hdu_list[1].data
+        elif len(self.hdu_list) <= 2:
+            print("No error extension found. Estimating the error spectra with the der_snr algorithm")
+            self.image_error = np.zeros( self.image_data.shape )
+            for i in range( 0, self.image_data.shape[0] ):
+                self.image_error[:,i] = der_snr( self.image_data[:,i] )
+
+        # Original:
+        self.wave = np.arange(self.crval3, self.crval3+self.cdelt3*self.naxis3, self.cdelt3) #wavelength
+
+    def open_KOALA(self, cube_fits_file):
+
+        self.hdu_list = fits.open(cube_fits_file) 
+
+        self.image_data = self.hdu_list[1].data
+        self.image_data[self.image_data == 1] = np.nan # convert 0 to nan
+        self.naxis1 = self.hdu_list[1].header['NAXIS1']
+        self.naxis2 = self.hdu_list[1].header['NAXIS2']
+        self.naxis3 = self.hdu_list[1].header['NAXIS3']
+        self.crval3 = self.hdu_list[1].header['CRVAL3']
+        self.cdelt3 = self.hdu_list[1].header['CD3_3']
+
+        # Original:
+        self.wave = np.arange(self.crval3, self.crval3+self.cdelt3*self.naxis3, self.cdelt3) #wavelength
+    # =====================================================================================
+    # =====================================================================================
     # =====================================================================================
 
 def der_snr(flux):
