@@ -14,7 +14,7 @@ plt.register_cmap(cmap=fuego_color_map)
 
 class test(object):
     
-    def __init__(self, cube_fits_file, origin_cube=None, slide=None, f_min =None, f_max =None, l_min =None, l_max =None, c_min =None, c_max =None, x0=None, y0=None, snr_max=None, snr_min=None):
+    def __init__(self, cube_fits_file, origin_cube=None, slide=None, f_min =None, f_max =None, l_min =None, l_max =None, c_min =None, c_max =None, x0=None, y0=None, snr_lmax=None, snr_lmin=None):
 
         ### Checking initial parameters
 
@@ -74,7 +74,7 @@ class test(object):
         ### Open cube
 
         if origin_cube == 'CALIFA':
-            self.open_CALIFA(cube_fits_file)
+            self.open_CALIFA(cube_fits_file, snr_lmin, snr_lmax)
         elif origin_cube == 'MUSE':
             self.open_MUSE(cube_fits_file)
         elif origin_cube == 'MANGA':
@@ -83,7 +83,7 @@ class test(object):
             self.open_SAMI(cube_fits_file)
         elif origin_cube == 'CAVITY':
             self.open_CAVITY(cube_fits_file)
-        else:
+        elif origin_cube == None:
             self.hdu_list = fits.open(cube_fits_file) 
             
             try:
@@ -99,7 +99,7 @@ class test(object):
                     self.cdelt3 = self.hdu_list[0].header['CD3_3'] 
 
                 # Original:
-                self.wave = np.arange(self.crval3, self.crval3+self.cdelt3*self.naxis3, self.cdelt3) #wavelength
+                self.wave2 = np.arange(self.crval3, self.crval3+self.cdelt3*self.naxis3, self.cdelt3) #wavelength
 
                 #self.image_error = hdu_list[1].data
 
@@ -122,7 +122,7 @@ class test(object):
                 self.cdelt3 = self.hdu_list[1].header['CD3_3'] 
 
                 # Original:
-                self.wave = np.arange(self.crval3, self.crval3+self.cdelt3*self.naxis3, self.cdelt3) #wavelength
+                self.wave2 = np.arange(self.crval3, self.crval3+self.cdelt3*self.naxis3, self.cdelt3) #wavelength
 
 
                 # Read the error spectra if available. Otherwise estimate the errors with the der_snr algorithm
@@ -157,15 +157,17 @@ class test(object):
 
         #### figure 2: spectrum
 
-        if snr_min != None:
-            self.snr_min = snr_min
-        else:
-            self.snr_min = np.nanmin(self.wave)
+        self.wave = self.wave2
 
-        if snr_max != None:
-            self.snr_max = snr_max
+        if snr_lmin != None:
+            self.snr_lmin = snr_lmin
         else:
-            self.snr_max = np.nanmax(self.wave)
+            self.snr_lmin = np.nanmin(self.wave)
+
+        if snr_lmax != None:
+            self.snr_lmax = snr_lmax
+        else:
+            self.snr_lmax = np.nanmax(self.wave)
 
         if self.slide == 0: 
             self.slide = int(self.naxis3/2) 
@@ -246,7 +248,7 @@ class test(object):
 
         ######
 
-        self.sum_cube = np.sum(self.image_data, axis=0)
+        #self.sum_cube = np.sum(self.image_data, axis=0)
 
         sscaleax = plt.axes([0.15, 0.25, 0.05, 0.1])
         self.sscale = RadioButtons(sscaleax, ('slide', 'sum', 'snr'), active=0)
@@ -455,25 +457,25 @@ class test(object):
         if label =="slide":
             self.l = self.ax1.imshow(self.image_data[int(self.slide)], origin='lower',cmap=self.cmap0, norm=self.norm)
         elif label =="sum":
-            self.sum_cube = np.nansum(self.image_data, axis=0)
-            self.sum_cube[self.sum_cube == 0] = np.nan
-            self.c_max = np.nanmax(np.nansum(self.image_data, axis=0))
+            #self.sum_cube = np.nansum(self.image_data, axis=0)
+            #self.sum_cube[self.sum_cube == 0] = np.nan
+            #self.c_max = np.nanmax(np.nansum(self.image_data, axis=0))
             #self.c_min = np.nanmin(np.nansum(self.image_data, axis=0))
-            self.c_min = np.nanpercentile(self.sum_cube, 50)
-            print(self.c_max, self.c_min)
-            self.l = self.ax1.imshow(self.sum_cube, vmin=self.c_min, vmax= self.c_max, origin='lower',cmap=self.cmap0)
+            #self.c_min = np.nanpercentile(self.sum_cube, 50)
+            #print(self.c_max, self.c_min)
+            self.l = self.ax1.imshow(self.sum_cube, vmin=self.c_min_sum, vmax= self.c_max_sum, origin='lower',cmap=self.cmap0)
         elif label =="snr":
-            self.idx_snr = np.where(np.logical_and( self.wave >= self.snr_min, self.wave <= self.snr_max ) )[0]
+            #self.idx_snr = np.where(np.logical_and( self.wave >= self.snr_lmin, self.wave <= self.snr_lmax ) )[0]
             #print(self.idx_snr)
             #self.idx_snr = np.nan_to_num(self.idx_snr)
-            self.signal = np.nanmedian(self.image_data[self.idx_snr,:],axis=0)
-            self.noise  = np.abs(np.nanmedian(np.sqrt(self.image_error[self.idx_snr,:]),axis=0))
-            self.snr    = self.signal / self.noise
-            print(np.nanmax(self.snr), np.nanmin(self.snr))
-            self.c_max = np.nanmax(self.snr)
+            #self.signal = np.nanmedian(self.image_data[self.idx_snr,:],axis=0)
+            #self.noise  = np.abs(np.nanmedian(np.sqrt(self.image_error[self.idx_snr,:]),axis=0))
+            #self.snr    = self.signal / self.noise
+            #print(np.nanmax(self.snr), np.nanmin(self.snr))
+            #self.c_max = np.nanmax(self.snr)
             #self.c_min = np.nanmin(np.nansum(self.image_data, axis=0))
-            self.c_min = np.nanpercentile(self.snr, 50)
-            self.l = self.ax1.imshow(self.snr, origin='lower', vmin=self.c_min, vmax= self.c_max, cmap=self.cmap0)
+            #self.c_min = np.nanpercentile(self.snr, 50)
+            self.l = self.ax1.imshow(self.snr, origin='lower', vmin=self.c_min_snr, vmax= self.c_max_snr, cmap=self.cmap0)
 
 
 
@@ -572,7 +574,7 @@ class test(object):
 
     """
 
-    def open_CALIFA(self, cube_fits_file):
+    def open_CALIFA(self, cube_fits_file, snr_lmin=None, snr_lmax=None):
 
         self.hdu_list = fits.open(cube_fits_file) 
 
@@ -584,8 +586,16 @@ class test(object):
         self.crval3 = self.hdu_list[0].header['CRVAL3']
         self.cdelt3 = self.hdu_list[0].header['CDELT3']
 
+        # Sum datacube
+        self.sum_cube = np.nansum(self.image_data, axis=0)
+        self.sum_cube[self.sum_cube == 0] = np.nan
+
+        self.c_max_sum = np.nanmax(np.nansum(self.image_data, axis=0))
+        #self.c_min = np.nanmin(np.nansum(self.image_data, axis=0))
+        self.c_min_sum = np.nanpercentile(self.sum_cube, 50)
+
         # Original:
-        self.wave = np.arange(self.crval3, self.crval3+self.cdelt3*self.naxis3, self.cdelt3) #wavelength
+        self.wave2 = np.arange(self.crval3, self.crval3+self.cdelt3*self.naxis3, self.cdelt3) #wavelength
 
         # Read the error spectra if available. Otherwise estimate the errors with the der_snr algorithm
         if len(self.hdu_list) > 2:
@@ -596,7 +606,31 @@ class test(object):
             for i in range( 0, self.image_data.shape[0] ):
                 self.image_error[:,i] = der_snr( self.image_data[:,i] )
 
-    def open_MUSE(self, cube_fits_file):
+        if snr_lmin != None:
+            self.snr_lmin = snr_lmin
+        else:
+            self.snr_lmin = np.nanmin(self.wave2)
+
+        if snr_lmax != None:
+            self.snr_lmax = snr_lmax
+        else:
+            self.snr_lmax = np.nanmax(self.wave2)
+
+        self.idx_snr = np.where(np.logical_and( self.wave2 >= self.snr_lmin, self.wave2 <= self.snr_lmax ) )[0]
+            #print(self.idx_snr)
+            #self.idx_snr = np.nan_to_num(self.idx_snr)
+        self.signal = np.nanmedian(self.image_data[self.idx_snr,:],axis=0)
+        self.noise  = np.abs(np.nanmedian(np.sqrt(self.image_error[self.idx_snr,:]),axis=0))
+        self.snr    = self.signal / self.noise
+        
+        self.c_max_snr = np.nanmax(self.snr)
+            #self.c_min = np.nanmin(np.nansum(self.image_data, axis=0))
+        self.c_min_snr = np.nanpercentile(self.snr, 60)
+        #print(self.c_min_snr, self.c_max_snr)
+
+        
+
+    def open_MUSE(self, cube_fits_file, snr_lmin=None, snr_lmax=None):
 
         self.hdu_list = fits.open(cube_fits_file) 
 
@@ -608,19 +642,49 @@ class test(object):
         self.crval3 = self.hdu_list[1].header['CRVAL3']
         self.cdelt3 = self.hdu_list[1].header['CD3_3']
 
+        # Sum datacube
+        self.sum_cube = np.nansum(self.image_data, axis=0)
+        self.sum_cube[self.sum_cube == 0] = np.nan
+
+        self.c_max_sum = np.nanmax(np.nansum(self.image_data, axis=0))
+        #self.c_min = np.nanmin(np.nansum(self.image_data, axis=0))
+        self.c_min_sum = np.nanpercentile(self.sum_cube, 50)
+
         # Read the error spectra if available. Otherwise estimate the errors with the der_snr algorithm
-        if len(self.hdu_list) > 3:
+        if len(self.hdu_list) == 3:
             self.image_error  = self.hdu_list[2].data
-        elif len(self.hdu_list) <= 3:
+        elif len(self.hdu_list) == 2:
             print("No error extension found. Estimating the error spectra with the der_snr algorithm")
             self.image_error = np.zeros( self.image_data.shape )
             for i in range( 0, self.image_data.shape[1] ):
                 self.image_error[:,i] = der_snr( self.image_data[:,i] )
 
         # Original:
-        self.wave = np.arange(self.crval3, self.crval3+self.cdelt3*self.naxis3, self.cdelt3) #wavelength
+        self.wave2 = np.arange(self.crval3, self.crval3+self.cdelt3*self.naxis3, self.cdelt3) #wavelength
 
-    def open_MANGA(self, cube_fits_file):
+        if snr_lmin != None:
+            self.snr_lmin = snr_lmin
+        else:
+            self.snr_lmin = np.nanmin(self.wave2)
+
+        if snr_lmax != None:
+            self.snr_lmax = snr_lmax
+        else:
+            self.snr_lmax = np.nanmax(self.wave2)
+
+        self.idx_snr = np.where(np.logical_and( self.wave2 >= self.snr_lmin, self.wave2 <= self.snr_lmax ) )[0]
+            #print(self.idx_snr)
+            #self.idx_snr = np.nan_to_num(self.idx_snr)
+        self.signal = np.nanmedian(self.image_data[self.idx_snr,:],axis=0)
+        self.noise  = np.abs(np.nanmedian(np.sqrt(self.image_error[self.idx_snr,:]),axis=0))
+        self.snr    = self.signal / self.noise
+        
+        self.c_max_snr = np.nanmax(self.snr)
+            #self.c_min = np.nanmin(np.nansum(self.image_data, axis=0))
+        self.c_min_snr = np.nanpercentile(self.snr, 60)
+        print(self.c_min_snr, self.c_max_snr)
+
+    def open_MANGA(self, cube_fits_file, snr_lmin=None, snr_lmax=None):
 
         self.hdu_list = fits.open(cube_fits_file) 
 
@@ -632,10 +696,47 @@ class test(object):
         self.crval3 = self.hdu_list[1].header['CRVAL3']
         self.cdelt3 = self.hdu_list[1].header['CD3_3']
 
-        # Original:
-        self.wave = self.hdu_list['WAVE'].data   #reading in wavelength
+        # Sum datacube
+        self.sum_cube = np.nansum(self.image_data, axis=0)
+        self.sum_cube[self.sum_cube == 0] = np.nan
 
-    def open_SAMI(self, cube_fits_file):
+        self.c_max_sum = np.nanmax(np.nansum(self.image_data, axis=0))
+        #self.c_min = np.nanmin(np.nansum(self.image_data, axis=0))
+        self.c_min_sum = np.nanpercentile(self.sum_cube, 50)
+
+        #self.image_error  = self.hdu_list['ERR'].data
+
+        self.image_error = np.zeros( self.image_data.shape )
+        for i in range(0, self.image_data.shape[1]):
+            self.image_error[:,i] = der_snr( self.image_data[:,i] )
+
+
+        # Original:
+        self.wave2 = self.hdu_list['WAVE'].data   #reading in wavelength
+
+        if snr_lmin != None:
+            self.snr_lmin = snr_lmin
+        else:
+            self.snr_lmin = np.nanmin(self.wave2)
+
+        if snr_lmax != None:
+            self.snr_lmax = snr_lmax
+        else:
+            self.snr_lmax = np.nanmax(self.wave2)
+
+        self.idx_snr = np.where(np.logical_and( self.wave2 >= self.snr_lmin, self.wave2 <= self.snr_lmax ) )[0]
+            #print(self.idx_snr)
+            #self.idx_snr = np.nan_to_num(self.idx_snr)
+        self.signal = np.nanmedian(self.image_data[self.idx_snr,:],axis=0)
+        self.noise  = np.abs(np.nanmedian(np.sqrt(self.image_error[self.idx_snr,:]),axis=0))
+        self.snr    = self.signal / self.noise
+        
+        self.c_max_snr = np.nanmax(self.snr)
+            #self.c_min = np.nanmin(np.nansum(self.image_data, axis=0))
+        self.c_min_snr = np.nanpercentile(self.snr, 60)
+        #print(self.c_min_snr, self.c_max_snr)
+
+    def open_SAMI(self, cube_fits_file, snr_lmin=None, snr_lmax=None):
 
         self.hdu_list = fits.open(cube_fits_file) 
 
@@ -647,6 +748,14 @@ class test(object):
         self.crval3 = self.hdu_list[0].header['CRVAL3']
         self.cdelt3 = self.hdu_list[0].header['CDELT3']
 
+        # Sum datacube
+        self.sum_cube = np.nansum(self.image_data, axis=0)
+        self.sum_cube[self.sum_cube == 0] = np.nan
+
+        self.c_max_sum = np.nanmax(np.nansum(self.image_data, axis=0))
+        #self.c_min = np.nanmin(np.nansum(self.image_data, axis=0))
+        self.c_min_sum = np.nanpercentile(self.sum_cube, 50)
+
         # Read the error spectra if available. Otherwise estimate the errors with the der_snr algorithm
         if len(self.hdu_list) > 2:
             self.image_error  = self.hdu_list[1].data
@@ -657,9 +766,31 @@ class test(object):
                 self.image_error[:,i] = der_snr( self.image_data[:,i] )
 
         # Original:
-        self.wave = np.arange(self.crval3, self.crval3+self.cdelt3*self.naxis3, self.cdelt3) #wavelength
+        self.wave2 = np.arange(self.crval3, self.crval3+self.cdelt3*self.naxis3, self.cdelt3) #wavelength
 
-    def open_CAVITY(self, cube_fits_file):
+        if snr_lmin != None:
+            self.snr_lmin = snr_lmin
+        else:
+            self.snr_lmin = np.nanmin(self.wave2)
+
+        if snr_lmax != None:
+            self.snr_lmax = snr_lmax
+        else:
+            self.snr_lmax = np.nanmax(self.wave2)
+
+        self.idx_snr = np.where(np.logical_and( self.wave2 >= self.snr_lmin, self.wave2 <= self.snr_lmax ) )[0]
+            #print(self.idx_snr)
+            #self.idx_snr = np.nan_to_num(self.idx_snr)
+        self.signal = np.nanmedian(self.image_data[self.idx_snr,:],axis=0)
+        self.noise  = np.abs(np.nanmedian(np.sqrt(self.image_error[self.idx_snr,:]),axis=0))
+        self.snr    = self.signal / self.noise
+        
+        self.c_max_snr = np.nanmax(self.snr)
+            #self.c_min = np.nanmin(np.nansum(self.image_data, axis=0))
+        self.c_min_snr = np.nanpercentile(self.snr, 60)
+        #print(self.c_min_snr, self.c_max_snr)
+
+    def open_CAVITY(self, cube_fits_file, snr_lmin=None, snr_lmax=None):
 
         self.hdu_list = fits.open(cube_fits_file) 
 
@@ -670,6 +801,14 @@ class test(object):
         self.naxis3 = self.hdu_list[0].header['NAXIS3']
         self.crval3 = self.hdu_list[0].header['CRVAL3']
         self.cdelt3 = self.hdu_list[0].header['CD3_3']
+
+        # Sum datacube
+        self.sum_cube = np.nansum(self.image_data, axis=0)
+        self.sum_cube[self.sum_cube == 0] = np.nan
+
+        self.c_max_sum = np.nanmax(np.nansum(self.image_data, axis=0))
+        #self.c_min = np.nanmin(np.nansum(self.image_data, axis=0))
+        self.c_min_sum = np.nanpercentile(self.sum_cube, 50)
         
         # Read the error spectra if available. Otherwise estimate the errors with the der_snr algorithm
         if len(self.hdu_list) > 2:
@@ -681,9 +820,31 @@ class test(object):
                 self.image_error[:,i] = der_snr( self.image_data[:,i] )
 
         # Original:
-        self.wave = np.arange(self.crval3, self.crval3+self.cdelt3*self.naxis3, self.cdelt3) #wavelength
+        self.wave2 = np.arange(self.crval3, self.crval3+self.cdelt3*self.naxis3, self.cdelt3) #wavelength
 
-    def open_KOALA(self, cube_fits_file):
+        if snr_lmin != None:
+            self.snr_lmin = snr_lmin
+        else:
+            self.snr_lmin = np.nanmin(self.wave2)
+
+        if snr_lmax != None:
+            self.snr_lmax = snr_lmax
+        else:
+            self.snr_lmax = np.nanmax(self.wave2)
+
+        self.idx_snr = np.where(np.logical_and( self.wave2 >= self.snr_lmin, self.wave2 <= self.snr_lmax ) )[0]
+            #print(self.idx_snr)
+            #self.idx_snr = np.nan_to_num(self.idx_snr)
+        self.signal = np.nanmedian(self.image_data[self.idx_snr,:],axis=0)
+        self.noise  = np.abs(np.nanmedian(np.sqrt(self.image_error[self.idx_snr,:]),axis=0))
+        self.snr    = self.signal / self.noise
+        
+        self.c_max_snr = np.nanmax(self.snr)
+            #self.c_min = np.nanmin(np.nansum(self.image_data, axis=0))
+        self.c_min_snr = np.nanpercentile(self.snr, 60)
+        #print(self.c_min_snr, self.c_max_snr)
+
+    def open_KOALA(self, cube_fits_file, snr_lmin=None, snr_lmax=None):
 
         self.hdu_list = fits.open(cube_fits_file) 
 
@@ -695,8 +856,39 @@ class test(object):
         self.crval3 = self.hdu_list[1].header['CRVAL3']
         self.cdelt3 = self.hdu_list[1].header['CD3_3']
 
+        # Sum datacube
+        self.sum_cube = np.nansum(self.image_data, axis=0)
+        self.sum_cube[self.sum_cube == 0] = np.nan
+
+        self.c_max_sum = np.nanmax(np.nansum(self.image_data, axis=0))
+        #self.c_min = np.nanmin(np.nansum(self.image_data, axis=0))
+        self.c_min_sum = np.nanpercentile(self.sum_cube, 50)
+
         # Original:
-        self.wave = np.arange(self.crval3, self.crval3+self.cdelt3*self.naxis3, self.cdelt3) #wavelength
+        self.wave2 = np.arange(self.crval3, self.crval3+self.cdelt3*self.naxis3, self.cdelt3) #wavelength
+
+        if snr_lmin != None:
+            self.snr_lmin = snr_lmin
+        else:
+            self.snr_lmin = np.nanmin(self.wave2)
+
+        if snr_lmax != None:
+            self.snr_lmax = snr_lmax
+        else:
+            self.snr_lmax = np.nanmax(self.wave2)
+
+        self.idx_snr = np.where(np.logical_and( self.wave2 >= self.snr_lmin, self.wave2 <= self.snr_lmax ) )[0]
+            #print(self.idx_snr)
+            #self.idx_snr = np.nan_to_num(self.idx_snr)
+        self.signal = np.nanmedian(self.image_data[self.idx_snr,:],axis=0)
+        self.noise  = np.abs(np.nanmedian(np.sqrt(self.image_error[self.idx_snr,:]),axis=0))
+        self.snr    = self.signal / self.noise
+        
+        self.c_max_snr = np.nanmax(self.snr)
+            #self.c_min = np.nanmin(np.nansum(self.image_data, axis=0))
+        self.c_min_snr = np.nanpercentile(self.snr, 60)
+        #print(self.c_min_snr, self.c_max_snr)
+
     # =====================================================================================
     # =====================================================================================
     # =====================================================================================
