@@ -1,11 +1,13 @@
-from PyIFSview import test
+from PyIFSview.PyIFSview import PyIFSview
 from astropy.io import fits
 import numpy as np
+#from PyIFSview.der_snr import der_snr
 
-test(cube_fits_file = 'NGC2253.fits.gz', origin_cube='CALIFA')
+
+#test(cube_fits_file = 'NGC2253.fits.gz')
 #test(cube_fits_file = 'J0210_cube.fits')
 #test(cube_fits_file = 'NGC2906.fits.fz', origin_cube='MUSE')
-#test(cube_fits_file = 'manga-7443-12703-LOGCUBE.fits.gz', origin_cube='MANGA')
+PyIFSview(cube_fits_file = 'manga-7443-12703-LOGCUBE.fits.gz', origin_cube='MANGA')
 #test(cube_fits_file = '37050_blue_8_Y13SAR1_P005_15T018.fits.gz', origin_cube='SAMI')
 
 
