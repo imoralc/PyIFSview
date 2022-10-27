@@ -1,3 +1,12 @@
+<div id="top"></div>
+
+[![Contributors][contributors-shield]][contributors-url]
+[![Forks][forks-shield]][forks-url]
+[![Stargazers][stars-shield]][stars-url]
+[![Issues][issues-shield]][issues-url]
+[![GNU License][license-shield]][license-url]
+[![LinkedIn][linkedin-shield]][linkedin-url]
+
 <center> <h1>PyIFSview</h1> </center>
 
 PyIFSview is a tool developed to interactively visualize integral field spectroscopy (IFS) data,  such as CALIFA, MaNGA, SAMI or MUSE data.
@@ -87,3 +96,20 @@ Screenshot of the code using data from the CALIFA Survey. The spectrum and the s
 
 
 <p align="right">(<a href="#top">back to top</a>)</p>
+
+
+<!-- MARKDOWN LINKS & IMAGES -->
+<!-- https://www.markdownguide.org/basic-syntax/#reference-style-links -->
+
+[contributors-shield]: https://img.shields.io/github/contributors/imoralc/PyIFSview.svg?style=plastic&logo=appveyor
+[contributors-url]: https://github.com/imoralc/PyIFSview/graphs/contributors
+[forks-shield]: https://img.shields.io/github/forks/imoralc/PyIFSview.svg?style=plastic&logo=appveyor
+[forks-url]: https://github.com/imoralc/PyIFSview/network/members
+[stars-shield]: https://img.shields.io/github/stars/imoralc/PyIFSview.svg?style=plastic&logo=appveyor
+[stars-url]: https://github.com/imoralc/PyIFSview/stargazers
+[issues-shield]: https://img.shields.io/github/issues/imoralc/PyIFSviewsvg?style=plastic&logo=appveyor
+[issues-url]: https://github.com/imoralc/PyIFSview/issues
+[license-shield]: https://img.shields.io/github/license/imoralc/PyIFSview.svg?style=plastic&logo=appveyor
+[license-url]: https://github.com/imoralc/PyIFSview/blob/main/LICENSE
+[linkedin-shield]: https://img.shields.io/badge/-LinkedIn-black.svg?style=plastic&logo=linkedin&colorB=555
+[linkedin-url]: https://www.linkedin.com/in/ignacio-del-moral-castro-0a139698/
