@@ -97,10 +97,9 @@ It is as easy as one line of code.
 
 The results obtained running this example would be:
 
-![PyIFSview example](Example.png "Example image using CALIFA data")
+![PyIFSview example](Example_NGC2253.png "Example image using CALIFA data")
 
-Screenshot of the code using data from the CALIFA Survey. The spectrum and the slide can be changed just by clicking on any spaxel in the slide plot and moving the horizontal line in the spectrum plot to select any wavelength, respectively. Additionally, the colormap can be also changed interactively just by clicking on any of the list. It can work with any colormap included in Matplotlib or designed by the user.
-
+Screenshot of the code using data from the CALIFA Survey. The spectrum and the slide can be changed just by clicking on any spaxel in the slide plot and moving the horizontal line in the spectrum plot to select any wavelength, respectively. Additionally, the colormap or the scale can be also changed interactively just by clicking on any of the list. It can work with any colormap included in Matplotlib or designed by the user.
 
 
 ![PyIFSview example video](Example_PyIFSview.mp4 "Example video using CALIFA data")
