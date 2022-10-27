@@ -126,6 +126,13 @@ Don't forget to give the project a star! Thanks again!
 
 <p align="right">(<a href="#top">back to top</a>)</p>
 
+Please try to create reports that are:
+
+*Reproducible.* Include steps to reproduce the problem.
+*Specific.* Include as much detail as possible: which version, what environment, etc.
+*Unique.* Do not duplicate existing opened issues.
+*Scoped to a single bug.* One bug per report.
+
 <!-- LICENSE -->
 
 ## License
