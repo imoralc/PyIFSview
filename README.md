@@ -80,7 +80,7 @@ or you can install the latest version of the code as
 ## Usage:
 
 In here we show how to use PyIFSview for a IFS datacube (three dimensional)
-First of all we have to import our library previously install and some dependecies
+First of all we have to import our library previously install
 
 ```python
     from PyIFSview import PyIFSview
@@ -100,6 +100,15 @@ The results obtained running this example would be:
 ![PyIFSview example](Example_NGC2253.png "Example image using CALIFA data")
 
 Screenshot of the code using data from the CALIFA Survey. The spectrum and the slide can be changed just by clicking on any spaxel in the slide plot and moving the horizontal line in the spectrum plot to select any wavelength, respectively. Additionally, the colormap or the scale can be also changed interactively just by clicking on any of the list. It can work with any colormap included in Matplotlib or designed by the user.
+
+- `cube_fits_file`: Path and name of the IFS datacube to read
+- `origin_cube`: str optional. This keyword allow us to indicate the origin of the data: CALIFA, MUSE, MaNGA, SAMI, KOALA or CAVITY
+- `slide`: float optional.
+- `f_min` and `f_max`: float optional. Flux limits of the spectrum's plot.
+- `l_min` and `l_max`: float optional. Wavelenght limits to show the spectrum
+- `c_min` and `c_max`: float optional. Flux limits of the imshow's plot.
+- `x0` and `y0`: int optional. Coordinates of the spectrum to show.
+- `snr_lmax` and `snr_lmin`: float optional. Wavelenght limits to compute the S/N
 
 
 ![PyIFSview example video](Example_PyIFSview.mp4 "Example video using CALIFA data")
