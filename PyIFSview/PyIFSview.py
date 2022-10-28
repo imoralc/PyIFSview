@@ -5,10 +5,7 @@ from astropy.io import fits
 import matplotlib.gridspec as gridspec
 from PyIFSview.der_snr import der_snr
 
-
-
-
-# Angel update fuego color map
+# Update fuego color map
 import matplotlib.colors as colors
 fuego_color_map = colors.LinearSegmentedColormap.from_list("fuego", ((0.25, 0, 0),  (0.5,0,0),    (1, 0, 0), (1, 0.5, 0), (1, 0.75, 0), (1, 1, 0), (1, 1, 1)), N=256, gamma=1.0)
 fuego_color_map.set_bad('lightgray')
@@ -20,7 +17,6 @@ class PyIFSview(object):
     def __init__(self, cube_fits_file, origin_cube=None, slide=None, f_min =None, f_max =None, l_min =None, l_max =None, c_min =None, c_max =None, x0=None, y0=None, snr_lmax=None, snr_lmin=None):
 
         ### Checking initial parameters
-        np.seterr(invalid='ignore')
 
         self.verbose= False
 
@@ -102,10 +98,8 @@ class PyIFSview(object):
                 except:
                     self.cdelt3 = self.hdu_list[0].header['CD3_3'] 
 
-                # Original:
-                self.wave2 = np.arange(self.crval3, self.crval3+self.cdelt3*self.naxis3, self.cdelt3) #wavelength
-
-                #self.image_error = hdu_list[1].data
+                # Wavelength:
+                self.wave2 = np.arange(self.crval3, self.crval3+self.cdelt3*self.naxis3, self.cdelt3) 
 
                 # Read the error spectra if available. Otherwise estimate the errors with the der_snr algorithm
                 if len(self.hdu_list) > 2:
@@ -127,8 +121,6 @@ class PyIFSview(object):
                     self.snr_lmax = np.nanmax(self.wave2)
 
                 self.idx_snr = np.where(np.logical_and( self.wave2 >= self.snr_lmin, self.wave2 <= self.snr_lmax ) )[0]
-                    #print(self.idx_snr)
-                    #self.idx_snr = np.nan_to_num(self.idx_snr)
                 self.signal = np.nanmedian(self.image_data[self.idx_snr,:],axis=0)
                 self.noise  = np.abs(np.nanmedian(np.sqrt(self.image_error[self.idx_snr,:]),axis=0))
                 self.snr    = self.signal / self.noise
@@ -146,9 +138,8 @@ class PyIFSview(object):
                 self.crval3 = self.hdu_list[1].header['CRVAL3']
                 self.cdelt3 = self.hdu_list[1].header['CD3_3'] 
 
-                # Original:
-                self.wave2 = np.arange(self.crval3, self.crval3+self.cdelt3*self.naxis3, self.cdelt3) #wavelength
-
+                # Wavelength:
+                self.wave2 = np.arange(self.crval3, self.crval3+self.cdelt3*self.naxis3, self.cdelt3) 
 
                 # Read the error spectra if available. Otherwise estimate the errors with the der_snr algorithm
                 if len(self.hdu_list) > 2:
@@ -170,8 +161,6 @@ class PyIFSview(object):
                     self.snr_lmax = np.nanmax(self.wave2)
 
                 self.idx_snr = np.where(np.logical_and( self.wave2 >= self.snr_lmin, self.wave2 <= self.snr_lmax ) )[0]
-                    #print(self.idx_snr)
-                    #self.idx_snr = np.nan_to_num(self.idx_snr)
                 self.signal = np.nanmedian(self.image_data[self.idx_snr,:],axis=0)
                 self.noise  = np.abs(np.nanmedian(np.sqrt(self.image_error[self.idx_snr,:]),axis=0))
                 self.snr    = self.signal / self.noise
@@ -191,9 +180,7 @@ class PyIFSview(object):
         
 
 
-        #self.fig, ax = plt.subplots()
         self.fig = plt.figure(figsize=(16,9))
-        #self.fig.canvas.mpl_disconnect(fig.canvas.manager.key_press_handler_id)  # This is for avoiding an annoying warning
         spec2 = gridspec.GridSpec(ncols=3, nrows=3)
         self.ax1 = self.fig.add_subplot(spec2[1:3, 0:2])   # Image bottom left
         self.ax2 = self.fig.add_subplot(spec2[0, 0:3])     # Spectrum top row
@@ -237,7 +224,7 @@ class PyIFSview(object):
         if self.l_max == 0: 
             self.l_max = max(self.wave)
         
-        ### define first plot with imshow
+        ### Defining first plot with imshow
 
         self.norm=colors.LogNorm(vmin=self.c_min, vmax=self.c_max)
 
@@ -247,7 +234,7 @@ class PyIFSview(object):
 
         self.l4, = self.ax1.plot(self.x0, self.y0, '+', color='black')
         
-        ### define second plot with the spectrum
+        ### Defining second plot with the spectrum
 
         self.ax2.set_title('spaxel'+' '+str(self.x0)+','+str(self.y0))
         spectrum = self.image_data[:,self.y0, self.x0]   ############################## CAREFUL: data reads y0, x0 !!!!!!!!!!!!!!!!!!!!!!
@@ -257,7 +244,7 @@ class PyIFSview(object):
         self.ax2.minorticks_on()
         self.ax2.set_ylabel('Flux [ erg cm$^{-2}$ s$^{-1}$ A$^{-1}$]')
 
-        ##### defining interactive Slide for wavelenght slide
+        ##### Defining interactive Slide for wavelenght slide
 
         axcolor = 'lightgoldenrodyellow'
         axfreq = plt.axes([0.125, 0.92, 0.776, 0.05], facecolor=axcolor)
@@ -267,13 +254,13 @@ class PyIFSview(object):
         
         self.sfreq.on_changed(self.update)
 
-        ##### defining interactive button for reset
+        ##### Defining interactive button for reset
         
         resetax = plt.axes([0.85, 0.2, 0.05, 0.05])
         self.button = Button(resetax, 'Reset', color=axcolor, hovercolor='0.975')
         self.button.on_clicked(self.reset)
 
-        ##### defining interactive button for cmaps
+        ##### Defining interactive button for cmaps
    
         rax = plt.axes([0.65, 0.20, 0.15, 0.22])
         
@@ -282,32 +269,23 @@ class PyIFSview(object):
         self.radio = RadioButtons(rax, (color_list), active=color_list.index(self.cmap0))
         self.radio.on_clicked(self.colorfunc)
 
-        
-
-        ##### choosing linear / log map / power
+        ##### Choosing linear / log map / power
         
         scaleax = plt.axes([0.85, 0.25, 0.05, 0.1])
         self.scale = RadioButtons(scaleax, ('linear', 'log', 'power 2'), active=1)
         self.scale.on_clicked(self.scalefunc)
 
-        ######
-
-        #self.sum_cube = np.sum(self.image_data, axis=0)
+        ###### Choosing cube / integrated / S/N plot
 
         sscaleax = plt.axes([0.15, 0.25, 0.05, 0.1])
         self.sscale = RadioButtons(sscaleax, ('slide', 'sum', 'snr'), active=0)
         self.sscale.on_clicked(self.select_map)
 
-        ######
-
-
-        ##### defining interactive limits for cmaps
+        ##### Defining interactive limits for cmaps
     
         ax_cmin = plt.axes([0.65, 0.1, 0.19, 0.03])
         ax_cmax  = plt.axes([0.65, 0.15, 0.19, 0.03])
         
-        #s_cmin = Slider(ax_cmin, 'min', min_value, c_max, valinit=c_min, valfmt='%5.2E')
-        #s_cmin = Sliderlog(ax_cmin, 'min', min_value, c_max, valinit=np.log10(c_min), valfmt='%5.2E')
         self.color_min =  np.nanpercentile(self.image_data, 1)    # These two must be the absolute min and max, otherwise this points couldn't be reached by slider!!!
         self.color_max =  np.nanmax(self.image_data)
         
@@ -332,7 +310,7 @@ class PyIFSview(object):
         self.text_box2.on_submit(self.input_cmax)
 
 
-         ##### defining interactive limits for flux in spectrum
+         ##### Defining interactive limits for flux in spectrum
     
         if self.f_max == 0: 
             self.f_max = np.nanmax(self.image_data)
@@ -353,7 +331,7 @@ class PyIFSview(object):
         self.s_fmax.on_changed(self.update_fmax)
 
 
-        ##### defining interactive limits for wavelength in spectrum
+        ##### Defining interactive limits for wavelength in spectrum
     
         ax_lmin = plt.axes([0.65, 0.55, 0.19, 0.03])
         ax_lmax  = plt.axes([0.65, 0.6, 0.19, 0.03])
@@ -377,7 +355,7 @@ class PyIFSview(object):
         self.button_up.on_clicked(self.planeup_event)
         self.button_down.on_clicked(self.planedown_event)
 
-        #### onclick
+        #### Onclick
     
         cid = self.fig.canvas.mpl_connect('button_press_event', self.onclick)  
 
@@ -388,8 +366,9 @@ class PyIFSview(object):
     # -----------------------------------------------------------------------------
     # -----------------------------------------------------------------------------
 
+    ##### Functions for setting the wavelenght slide
+
     def update(self,val):
-        #amp = self.samp.val
         self.freq = self.sfreq.val
         self.l.set_data(self.image_data[int(self.freq)])
         self.ax1.set_title(str(self.wave[int(self.freq)])+' $\AA$')
@@ -422,8 +401,6 @@ class PyIFSview(object):
         self.ax1.set_title(str(self.wave[int(self.freq)])+' $\AA$')
         self.fig.canvas.draw_idle()
             #print("CAN'T GO LOWER!!")
-
-
 
     ##### Functions for input boxes
 
@@ -491,9 +468,7 @@ class PyIFSview(object):
         self.fig.canvas.draw_idle()
 
 
-    ####
-
-    ##### Functions for setting the colour scale
+    ##### Functions for choosing among cube / integrated / S/N maps 
 
     def select_map(self, label):
         self.ax1.cla()
@@ -501,27 +476,9 @@ class PyIFSview(object):
         if label =="slide":
             self.l = self.ax1.imshow(self.image_data[int(self.slide)], origin='lower',cmap=self.cmap0, norm=self.norm)
         elif label =="sum":
-            #self.sum_cube = np.nansum(self.image_data, axis=0)
-            #self.sum_cube[self.sum_cube == 0] = np.nan
-            #self.c_max = np.nanmax(np.nansum(self.image_data, axis=0))
-            #self.c_min = np.nanmin(np.nansum(self.image_data, axis=0))
-            #self.c_min = np.nanpercentile(self.sum_cube, 50)
-            #print(self.c_max, self.c_min)
             self.l = self.ax1.imshow(self.sum_cube, vmin=self.c_min_sum, vmax= self.c_max_sum, origin='lower',cmap=self.cmap0)
         elif label =="snr":
-            #self.idx_snr = np.where(np.logical_and( self.wave >= self.snr_lmin, self.wave <= self.snr_lmax ) )[0]
-            #print(self.idx_snr)
-            #self.idx_snr = np.nan_to_num(self.idx_snr)
-            #self.signal = np.nanmedian(self.image_data[self.idx_snr,:],axis=0)
-            #self.noise  = np.abs(np.nanmedian(np.sqrt(self.image_error[self.idx_snr,:]),axis=0))
-            #self.snr    = self.signal / self.noise
-            #print(np.nanmax(self.snr), np.nanmin(self.snr))
-            #self.c_max = np.nanmax(self.snr)
-            #self.c_min = np.nanmin(np.nansum(self.image_data, axis=0))
-            #self.c_min = np.nanpercentile(self.snr, 50)
             self.l = self.ax1.imshow(self.snr, origin='lower', vmin=self.c_min_snr, vmax= self.c_max_snr, cmap=self.cmap0)
-
-
 
         self.ax1.set_xlabel('spaxel_x ')
         self.ax1.set_ylabel('spaxel_y')
@@ -533,13 +490,10 @@ class PyIFSview(object):
         #radio.set_active(self.color_list.index(self.cmap0))
         #plt.draw()
         self.fig.canvas.draw_idle()
-
-    ####
         
     ##### Function for interactive changing spaxel cliking in image or changing slide clicking in spectrum
 
     def onclick(self,event):
-        #global f_min,f_max,slide, ax1
         # Check if the click was in ax1 and update spectrum
         if event.inaxes in [self.ax1]: 
             if int(event.xdata) < self.naxis1 and int(event.ydata) < self.naxis2:
@@ -564,7 +518,6 @@ class PyIFSview(object):
             self.slide = int(self.val)
             self.sfreq.set_val(self.slide)
 
-
     ##### Functions for setting the flux range
 
     def update_fmin(self, val, s=None):
@@ -576,9 +529,6 @@ class PyIFSview(object):
         #f_max = s_fmax.val
         self.ax2.set_ylim(self.s_fmin.val, self.s_fmax.val)
         #plt.draw()
-
-
-
 
     ##### Functions for setting the wavelength range
 
@@ -619,10 +569,9 @@ class PyIFSview(object):
     +) CALIFA
     +) MaNGA
     +) SAMI
+    +) MUSE DATA
     +) CAVITY (ongoing survey)
     +) KOALA (ongoing survey)
-    +) MUSE DATA
-
     """
 
     def open_CALIFA(self, cube_fits_file, snr_lmin=None, snr_lmax=None):
