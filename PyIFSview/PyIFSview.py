@@ -623,7 +623,7 @@ class PyIFSview(object):
 
     def update_lmax(self, val, s=None):
         #l_max = s_lmax.val
-        self.ax2.set_xlim(self.l_min,self.s_lmax.val)
+        self.ax2.set_xlim(self.l_min.val,self.s_lmax.val)
         #plt.draw()
 
     ##### Functions for reset parameters
@@ -632,6 +632,8 @@ class PyIFSview(object):
         self.sfreq.reset()
         #self.cmap0.reset()
         #self.samp.reset()
+        self.s_lmin.reset() 
+        self.s_lmax.reset()
         self.s_cmin.reset() 
         self.s_cmax.reset()
         self.s_fmin.reset()
