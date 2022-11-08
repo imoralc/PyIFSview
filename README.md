@@ -82,7 +82,7 @@ First of all we have to import our library previously install
     from PyIFSview import PyIFSview
 ```
 
-Then we read the [CALIFA datacube]([https://github.com/PabloMSanAla/fabada/blob/master/examples/bubble.png](https://github.com/imoralc/PyIFSview/blob/main/NGC2253.fits.gz)) borrowed from the [CALIFA Legacy Survey](https://califa.caha.es/).
+Then we read the [CALIFA datacube](https://github.com/imoralc/PyIFSview/blob/main/NGC2253.fits.gz) borrowed from the [CALIFA Legacy Survey](https://califa.caha.es/).
 
 ```python
     PyIFSview(cube_fits_file = 'NGC2253.fits.gz')

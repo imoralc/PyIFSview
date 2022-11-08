@@ -1,3 +1,66 @@
+################################################################################
+
+"""
+Copyright (C) 2022, Ignacio del Moral Castro
+E-mail: ignaciodelmoralcastro@gmail.com
+
+################################################################################
+
+NAME:
+
+PyIFSview()
+
+PURPOSE:
+
+PyIFSview is a tool developed to interactively visualize integral field spectroscopy (IFS) data, 
+such as CALIFA, MaNGA, SAMI or MUSE data.
+
+CALLING SEQUENCE:
+
+from PyIFSview import PyIFSview
+
+PyIFSview(cube_fits_file, origin_cube=None, slide=None, f_min =None, f_max =None, l_min =None, 
+          l_max =None, c_min =None, c_max =None, x0=None, y0=None, snr_lmax=None, snr_lmin=None)
+
+
+INPUT PARAMETERS
+
+- `cube_fits_file`: Path and name of the IFS datacube to read
+
+KEYWORDS:
+
+- origin_cube: str optional. This keyword allow us to indicate the origin of the data.
+  Possible options: CALIFA, MUSE, MaNGA, SAMI, KOALA or CAVITY
+
+- slide: float optional.
+
+- f_min and f_max: float optional. Flux limits of the spectrum's plot.
+
+- l_min` and l_max: float optional. Wavelenght limits to show the spectrum
+
+- c_min` and c_max: float optional. Flux limits of the imshow's plot.
+
+- x0 and y0: int optional. Coordinates of the spectrum to show.
+
+- snr_lmax and snr_lmin: float optional. Wavelenght limits to compute the S/N
+
+
+REQUIRED ROUTINES:
+
+- Numpy: Python library used for working with arrays
+- Matplotlib: Python 2D plotting library
+- Astropy: astronomy library
+
+NODIFICATION HISTORY:
+
+V1.0.0 -- Created by Ignacio del Moral-Castro
+
+"""
+
+########################################################################
+#     importing libraries                                              #
+########################################################################
+
 import numpy as np
 import matplotlib.pyplot as plt
 from matplotlib.widgets import Slider, Button, RadioButtons, TextBox
@@ -98,6 +161,15 @@ class PyIFSview(object):
                 except:
                     self.cdelt3 = self.hdu_list[0].header['CD3_3'] 
 
+
+                # Sum datacube
+                self.sum_cube = np.nansum(self.image_data, axis=0)
+                self.sum_cube[self.sum_cube == 0] = np.nan
+
+                self.c_max_sum = np.nanmax(np.nansum(self.image_data, axis=0))
+                #self.c_min = np.nanmin(np.nansum(self.image_data, axis=0))
+                self.c_min_sum = np.nanpercentile(self.sum_cube, 50)
+
                 # Wavelength:
                 self.wave2 = np.arange(self.crval3, self.crval3+self.cdelt3*self.naxis3, self.cdelt3) 
 
@@ -137,6 +209,14 @@ class PyIFSview(object):
                 self.naxis3 = self.hdu_list[1].header['NAXIS3']
                 self.crval3 = self.hdu_list[1].header['CRVAL3']
                 self.cdelt3 = self.hdu_list[1].header['CD3_3'] 
+
+                # Sum datacube
+                self.sum_cube = np.nansum(self.image_data, axis=0)
+                self.sum_cube[self.sum_cube == 0] = np.nan
+
+                self.c_max_sum = np.nanmax(np.nansum(self.image_data, axis=0))
+                #self.c_min = np.nanmin(np.nansum(self.image_data, axis=0))
+                self.c_min_sum = np.nanpercentile(self.sum_cube, 50)
 
                 # Wavelength:
                 self.wave2 = np.arange(self.crval3, self.crval3+self.cdelt3*self.naxis3, self.cdelt3) 
@@ -237,7 +317,7 @@ class PyIFSview(object):
         ### Defining second plot with the spectrum
 
         self.ax2.set_title('spaxel'+' '+str(self.x0)+','+str(self.y0))
-        spectrum = self.image_data[:,self.y0, self.x0]   ############################## CAREFUL: data reads y0, x0 !!!!!!!!!!!!!!!!!!!!!!
+        spectrum = self.image_data[:,self.y0, self.x0]   ### data reads lambda, y0, x0 
         self.l2, = self.ax2.plot(self.wave[:], spectrum, label='emision')
         self.ax2.set_xlim(self.l_min, self.l_max)
         self.ax2.set_xlabel('Wavelength [$\AA$]')
@@ -364,7 +444,6 @@ class PyIFSview(object):
     # -----------------------------------------------------------------------------
     # -----------------------------------------------------------------------------
     # -----------------------------------------------------------------------------
-    # -----------------------------------------------------------------------------
 
     ##### Functions for setting the wavelenght slide
 
@@ -420,6 +499,7 @@ class PyIFSview(object):
 
     """" 
     These functions allow to modify: 
+
     -) the colour map choosing among several options (more o different options can be add)
     -) the colour range choosing interactively the vmin and vmax values
 
@@ -429,7 +509,6 @@ class PyIFSview(object):
         self.l.set_cmap(label)
         #plt.draw()
         self.fig.canvas.draw_idle()
-
 
     def update_cmin(self, val, s=None):
         #f_min = s_fmin.val
@@ -560,6 +639,7 @@ class PyIFSview(object):
 
     # -----------------------------------------------------------------------------
     # -----------------------------------------------------------------------------
+    # -----------------------------------------------------------------------------
 
     ##### Functions for opening specific datacubes
 
@@ -594,8 +674,8 @@ class PyIFSview(object):
         #self.c_min = np.nanmin(np.nansum(self.image_data, axis=0))
         self.c_min_sum = np.nanpercentile(self.sum_cube, 50)
 
-        # Original:
-        self.wave2 = np.arange(self.crval3, self.crval3+self.cdelt3*self.naxis3, self.cdelt3) #wavelength
+        # Wavelength:
+        self.wave2 = np.arange(self.crval3, self.crval3+self.cdelt3*self.naxis3, self.cdelt3) 
 
         # Read the error spectra if available. Otherwise estimate the errors with the der_snr algorithm
         if len(self.hdu_list) > 2:
@@ -617,19 +697,16 @@ class PyIFSview(object):
             self.snr_lmax = np.nanmax(self.wave2)
 
         self.idx_snr = np.where(np.logical_and( self.wave2 >= self.snr_lmin, self.wave2 <= self.snr_lmax ) )[0]
-            #print(self.idx_snr)
-            #self.idx_snr = np.nan_to_num(self.idx_snr)
         self.signal = np.nanmedian(self.image_data[self.idx_snr,:],axis=0)
         self.noise  = np.abs(np.nanmedian(np.sqrt(self.image_error[self.idx_snr,:]),axis=0))
         self.snr    = self.signal / self.noise
         
         self.c_max_snr = np.nanmax(self.snr)
-            #self.c_min = np.nanmin(np.nansum(self.image_data, axis=0))
+        #self.c_min = np.nanmin(np.nansum(self.image_data, axis=0))
         self.c_min_snr = np.nanpercentile(self.snr, 60)
         #print(self.c_min_snr, self.c_max_snr)
 
-        
-
+    
     def open_MUSE(self, cube_fits_file, snr_lmin=None, snr_lmax=None):
 
         self.hdu_list = fits.open(cube_fits_file) 
@@ -659,8 +736,8 @@ class PyIFSview(object):
             for i in range( 0, self.image_data.shape[1] ):
                 self.image_error[:,i] = der_snr( self.image_data[:,i] )
 
-        # Original:
-        self.wave2 = np.arange(self.crval3, self.crval3+self.cdelt3*self.naxis3, self.cdelt3) #wavelength
+        # Wavelength:
+        self.wave2 = np.arange(self.crval3, self.crval3+self.cdelt3*self.naxis3, self.cdelt3) 
 
         if snr_lmin != None:
             self.snr_lmin = snr_lmin
@@ -711,8 +788,8 @@ class PyIFSview(object):
             self.image_error[:,i] = der_snr( self.image_data[:,i] )
 
 
-        # Original:
-        self.wave2 = self.hdu_list['WAVE'].data   #reading in wavelength
+        # Wavelength:
+        self.wave2 = self.hdu_list['WAVE'].data 
 
         if snr_lmin != None:
             self.snr_lmin = snr_lmin
@@ -765,8 +842,8 @@ class PyIFSview(object):
             for i in range( 0, self.image_data.shape[0] ):
                 self.image_error[:,i] = der_snr( self.image_data[:,i] )
 
-        # Original:
-        self.wave2 = np.arange(self.crval3, self.crval3+self.cdelt3*self.naxis3, self.cdelt3) #wavelength
+        # Wavelength:
+        self.wave2 = np.arange(self.crval3, self.crval3+self.cdelt3*self.naxis3, self.cdelt3)
 
         if snr_lmin != None:
             self.snr_lmin = snr_lmin
@@ -819,8 +896,8 @@ class PyIFSview(object):
             for i in range( 0, self.image_data.shape[0] ):
                 self.image_error[:,i] = der_snr( self.image_data[:,i] )
 
-        # Original:
-        self.wave2 = np.arange(self.crval3, self.crval3+self.cdelt3*self.naxis3, self.cdelt3) #wavelength
+        # Wavelength:
+        self.wave2 = np.arange(self.crval3, self.crval3+self.cdelt3*self.naxis3, self.cdelt3)
 
         if snr_lmin != None:
             self.snr_lmin = snr_lmin

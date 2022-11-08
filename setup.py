@@ -3,24 +3,20 @@ from setuptools import find_packages, setup
 
 HERE = pathlib.Path(__file__).parent
 
-VERSION = '1.0.0' #Muy importante, deberéis ir cambiando la versión de vuestra librería según incluyáis nuevas funcionalidades
-PACKAGE_NAME = 'PyIFSview' #Debe coincidir con el nombre de la carpeta 
-AUTHOR = 'Ignacio del Moral Castro' #Modificar con vuestros datos
-AUTHOR_EMAIL = 'ignaciodelmoralcastro@gmail.com' #Modificar con vuestros datos
-URL = 'https://github.com/imoralc/PyIFSview' #Modificar con vuestros datos
+VERSION = '1.0' 
+PACKAGE_NAME = 'PyIFSview' 
+AUTHOR = 'Ignacio del Moral Castro' 
+AUTHOR_EMAIL = 'ignaciodelmoralcastro@gmail.com' 
+URL = 'https://github.com/imoralc/PyIFSview' 
 
-LICENSE = 'MIT' #Tipo de licencia
-DESCRIPTION = 'Library to interactively visualize integral field spectroscopy (IFS) data' #Descripción corta
-LONG_DESCRIPTION = (HERE / "README.md").read_text(encoding='utf-8') #Referencia al documento README con una descripción más elaborada
+LICENSE = 'MIT' 
+DESCRIPTION = 'Library to interactively visualize integral field spectroscopy (IFS) data' 
+LONG_DESCRIPTION = (HERE / "README.md").read_text(encoding='utf-8')
 LONG_DESC_TYPE = "text/markdown"
+INCLUDE_PACKAGE_DATA=True,
 
 
-#Paquetes necesarios para que funcione la libreía. Se instalarán a la vez si no lo tuvieras ya instalado
-INSTALL_REQUIRES = [
-      'numpy'
-      'astropy'
-      'matplotlib'
-      ]
+INSTALL_REQUIRES = ['numpy', 'astropy', 'matplotlib']
 
 setup(
     name=PACKAGE_NAME,
